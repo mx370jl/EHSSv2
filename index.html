@@ -375,6 +375,8 @@
                     };
                 }
 
+                console.log("Submitting form data:", JSON.stringify(formData, null, 2));
+
                 // Submit to API
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
@@ -392,6 +394,11 @@
                     document.getElementById("dynamicFields").innerHTML = "";
                 } else {
                     const errorText = await response.text();
+                    console.error("Full error response:", errorText);
+                    console.error("Response headers:", [...response.headers.entries()]);
+                    console.error("Response status:", response.status);
+                    console.error("Response statusText:", response.statusText);
+                    console.error("Form data sent:", JSON.stringify(formData, null, 2));
                     showResult("Submission failed: " + response.status + " - " + errorText, "error");
                 }
 
