@@ -344,35 +344,38 @@
                 const token = await acquireToken();
                 
                 // Collect form data
+                const incidentType = document.getElementById("incidentType").value;
+                
                 const formData = {
-                    incidentTypeId: document.getElementById("incidentType").value,
+                    incidentTypeId: incidentType,
                     title: document.getElementById("title").value,
                     occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
                     location: document.getElementById("location").value,
                     description: document.getElementById("description").value,
                     reportedByEmail: getCurrentAccount().username,
-                    customFields: {}
+                    customFields: {
+                        injury: incidentType === "injury",
+                        rootCause: ""
+                    }
                 };
 
-                // Collect dynamic fields
-                const incidentType = document.getElementById("incidentType").value;
+                // Set rootCause based on incident type and collected dynamic fields
                 if (incidentType === "injury") {
-                    formData.customFields = {
-                        injurySeverity: document.getElementById("injurySeverity")?.value || "",
-                        bodyPart: document.getElementById("bodyPart")?.value || "",
-                        medicalAttention: document.getElementById("medicalAttention")?.value || ""
-                    };
+                    const injurySeverity = document.getElementById("injurySeverity")?.value || "";
+                    const bodyPart = document.getElementById("bodyPart")?.value || "";
+                    const medicalAttention = document.getElementById("medicalAttention")?.value || "";
+                    formData.customFields.rootCause = `Injury: ${injurySeverity} affecting ${bodyPart}, medical attention: ${medicalAttention}`;
                 } else if (incidentType === "environmental") {
-                    formData.customFields = {
-                        spillType: document.getElementById("spillType")?.value || "",
-                        spillVolume: document.getElementById("spillVolume")?.value || "",
-                        containment: document.getElementById("containment")?.value || ""
-                    };
+                    const spillType = document.getElementById("spillType")?.value || "";
+                    const spillVolume = document.getElementById("spillVolume")?.value || "";
+                    const containment = document.getElementById("containment")?.value || "";
+                    formData.customFields.rootCause = `Environmental: ${spillType} spill of ${spillVolume}, containment: ${containment}`;
                 } else if (incidentType === "near-miss") {
-                    formData.customFields = {
-                        potentialConsequence: document.getElementById("potentialConsequence")?.value || "",
-                        preventedBy: document.getElementById("preventedBy")?.value || ""
-                    };
+                    const potentialConsequence = document.getElementById("potentialConsequence")?.value || "";
+                    const preventedBy = document.getElementById("preventedBy")?.value || "";
+                    formData.customFields.rootCause = `Near Miss: potential ${potentialConsequence}, prevented by: ${preventedBy}`;
+                } else {
+                    formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
                 }
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
