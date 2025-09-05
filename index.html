@@ -237,11 +237,15 @@
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
             console.log("API Base URL:", apiBaseUrl);
-            console.log("Full URL:", `${apiBaseUrl}/referencedata`);
+            console.log("Full URL:", `${apiBaseUrl}/reference-data`);
+            
+            // TEMPORARY: Test direct Logic App URL
+            const testURL = "https://prod-76.eastus.logic.azure.com:443/workflows/[YOUR-LOGIC-APP-WORKFLOW-ID]/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=[YOUR-SIG]";
+            console.log("Testing direct Logic App URL (replace with yours):", testURL);
             
             try {
                 console.log("Making fetch request...");
-                const response = await fetch(`${apiBaseUrl}/referencedata`, {
+                const response = await fetch(`${apiBaseUrl}/reference-data`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
@@ -289,6 +293,9 @@
 
         // Populate dropdowns with data
         async function loadDropdownData() {
+            // Show loading overlay immediately
+            showLoadingOverlay();
+            
             alert("loadDropdownData function started!"); // DEBUG TEST - REMOVE LATER
             console.log("=== Starting loadDropdownData ===");
             const incidentTypeSelect = document.getElementById("incidentType");
@@ -302,36 +309,95 @@
             incidentTypeSelect.innerHTML = '<option value="">Loading incident types...</option>';
             console.log("Set loading state for incident types");
             
-            // Load data from Logic App
-            console.log("Calling fetchReferenceData...");
-            const referenceData = await fetchReferenceData();
-            console.log("fetchReferenceData returned:", !!referenceData);
-            
-            if (referenceData) {
-                console.log("=== Processing reference data ===");
+            try {
+                // Load data from Logic App
+                console.log("Calling fetchReferenceData...");
+                const referenceData = await fetchReferenceData();
+                console.log("fetchReferenceData returned:", !!referenceData);
                 
-                // Populate incident types
-                if (referenceData.incidentTypes && referenceData.incidentTypes.length > 0) {
-                    console.log(`Processing ${referenceData.incidentTypes.length} incident types...`);
-                    incidentTypeSelect.innerHTML = '<option value="">Select incident type...</option>';
+                if (referenceData) {
+                    console.log("=== Processing reference data ===");
                     
-                    referenceData.incidentTypes.forEach((type, index) => {
-                        console.log(`Adding incident type ${index + 1}:`, {
-                            id: type.crb18_humit_incidenttypeid,
-                            name: type.crb18_eventtypename
+                    // Populate incident types
+                    if (referenceData.incidentTypes && referenceData.incidentTypes.length > 0) {
+                        console.log(`Processing ${referenceData.incidentTypes.length} incident types...`);
+                        incidentTypeSelect.innerHTML = '<option value="">Select incident type...</option>';
+                        
+                        referenceData.incidentTypes.forEach((type, index) => {
+                            console.log(`Adding incident type ${index + 1}:`, {
+                                id: type.crb18_humit_incidenttypeid,
+                                name: type.crb18_eventtypename
+                            });
+                            const option = document.createElement('option');
+                            option.value = type.crb18_humit_incidenttypeid;
+                            option.textContent = type.crb18_eventtypename;
+                            incidentTypeSelect.appendChild(option);
                         });
-                        const option = document.createElement('option');
-                        option.value = type.crb18_humit_incidenttypeid;
-                        option.textContent = type.crb18_eventtypename;
-                        incidentTypeSelect.appendChild(option);
-                    });
-                    console.log("Incident types dropdown populated successfully");
-                } else {
-                    console.log("No incident types found, using fallback");
-                    console.log("incidentTypes exists:", !!referenceData.incidentTypes);
-                    console.log("incidentTypes length:", referenceData.incidentTypes?.length);
+                        console.log("Incident types dropdown populated successfully");
+                    } else {
+                        console.log("No incident types found, using fallback");
+                        console.log("incidentTypes exists:", !!referenceData.incidentTypes);
+                        console.log("incidentTypes length:", referenceData.incidentTypes?.length);
+                        
+                        // Fallback to hardcoded values
+                        incidentTypeSelect.innerHTML = `
+                            <option value="">Select incident type...</option>
+                            <option value="injury">Injury</option>
+                            <option value="near-miss">Near Miss</option>
+                            <option value="environmental">Environmental</option>
+                            <option value="property-damage">Property Damage</option>
+                            <option value="security">Security</option>
+                            <option value="other">Other</option>
+                        `;
+                    }
+
+                    // Populate locations - handle nested structure
+                    console.log("=== Processing locations ===");
+                    const locations = referenceData.locations?.ResultSets?.Table1;
+                    console.log("Extracted locations array:", !!locations);
+                    console.log("Locations array length:", locations?.length || 0);
                     
-                    // Fallback to hardcoded values
+                    if (locations && locations.length > 0) {
+                        console.log(`Processing ${locations.length} locations...`);
+                        
+                        // Replace text input with dropdown
+                        const locationGroup = locationInput.parentElement;
+                        console.log("Location parent element found:", !!locationGroup);
+                        
+                        const newSelect = document.createElement('select');
+                        newSelect.id = 'location';
+                        newSelect.innerHTML = '<option value="">Select location...</option>';
+                        
+                        locations.forEach((location, index) => {
+                            if (index < 5) { // Log first 5 for debugging
+                                console.log(`Adding location ${index + 1}:`, {
+                                    code: location.Humacyte_Location,
+                                    description: location.Humacyte_Location_Description,
+                                    details: location.Humacyte_Location_Details
+                                });
+                            }
+                            const option = document.createElement('option');
+                            option.value = location.Humacyte_Location;
+                            option.textContent = `${location.Humacyte_Location} - ${location.Humacyte_Location_Description}`;
+                            option.title = location.Humacyte_Location_Details;
+                            newSelect.appendChild(option);
+                        });
+                        
+                        console.log("Replacing location input with dropdown...");
+                        locationGroup.replaceChild(newSelect, locationInput);
+                        console.log(`Locations dropdown created with ${locations.length} options`);
+                    } else {
+                        console.log("No locations found, keeping text input");
+                        console.log("Debug info:");
+                        console.log("- referenceData.locations:", !!referenceData.locations);
+                        console.log("- referenceData.locations keys:", referenceData.locations ? Object.keys(referenceData.locations) : 'N/A');
+                        if (referenceData.locations?.ResultSets) {
+                            console.log("- ResultSets keys:", Object.keys(referenceData.locations.ResultSets));
+                        }
+                    }
+                } else {
+                    console.log("No reference data received, using fallback values");
+                    // Fallback to hardcoded incident types if API fails
                     incidentTypeSelect.innerHTML = `
                         <option value="">Select incident type...</option>
                         <option value="injury">Injury</option>
@@ -342,54 +408,9 @@
                         <option value="other">Other</option>
                     `;
                 }
-
-                // Populate locations - handle nested structure
-                console.log("=== Processing locations ===");
-                const locations = referenceData.locations?.ResultSets?.Table1;
-                console.log("Extracted locations array:", !!locations);
-                console.log("Locations array length:", locations?.length || 0);
-                
-                if (locations && locations.length > 0) {
-                    console.log(`Processing ${locations.length} locations...`);
-                    
-                    // Replace text input with dropdown
-                    const locationGroup = locationInput.parentElement;
-                    console.log("Location parent element found:", !!locationGroup);
-                    
-                    const newSelect = document.createElement('select');
-                    newSelect.id = 'location';
-                    newSelect.innerHTML = '<option value="">Select location...</option>';
-                    
-                    locations.forEach((location, index) => {
-                        if (index < 5) { // Log first 5 for debugging
-                            console.log(`Adding location ${index + 1}:`, {
-                                code: location.Humacyte_Location,
-                                description: location.Humacyte_Location_Description,
-                                details: location.Humacyte_Location_Details
-                            });
-                        }
-                        const option = document.createElement('option');
-                        option.value = location.Humacyte_Location;
-                        option.textContent = `${location.Humacyte_Location} - ${location.Humacyte_Location_Description}`;
-                        option.title = location.Humacyte_Location_Details;
-                        newSelect.appendChild(option);
-                    });
-                    
-                    console.log("Replacing location input with dropdown...");
-                    locationGroup.replaceChild(newSelect, locationInput);
-                    console.log(`Locations dropdown created with ${locations.length} options`);
-                } else {
-                    console.log("No locations found, keeping text input");
-                    console.log("Debug info:");
-                    console.log("- referenceData.locations:", !!referenceData.locations);
-                    console.log("- referenceData.locations keys:", referenceData.locations ? Object.keys(referenceData.locations) : 'N/A');
-                    if (referenceData.locations?.ResultSets) {
-                        console.log("- ResultSets keys:", Object.keys(referenceData.locations.ResultSets));
-                    }
-                }
-            } else {
-                console.log("No reference data received, using fallback values");
-                // Fallback to hardcoded incident types if API fails
+            } catch (error) {
+                console.error("Error in loadDropdownData:", error);
+                // Ensure fallback values are set even if there's an error
                 incidentTypeSelect.innerHTML = `
                     <option value="">Select incident type...</option>
                     <option value="injury">Injury</option>
@@ -399,8 +420,11 @@
                     <option value="security">Security</option>
                     <option value="other">Other</option>
                 `;
+            } finally {
+                // Always hide loading overlay when done (success or failure)
+                hideLoadingOverlay();
+                console.log("=== loadDropdownData complete ===");
             }
-            console.log("=== loadDropdownData complete ===");
         }
 
         // Sign-in functionality
