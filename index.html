@@ -5,394 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incident Reporting - Beautiful Form</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
+            min-height: 100vh; padding: 20px; position: relative;
         }
-
         .background-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.1;
-            background-image: 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1;
+            background-image:
                 radial-gradient(circle at 20% 50%, white 1px, transparent 1px),
                 radial-gradient(circle at 70% 80%, white 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
+            background-size: 50px 50px; pointer-events: none; z-index: 0;
         }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
+        .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
         .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
             border-radius: 20px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.1),
-                0 0 0 1px rgba(255, 255, 255, 0.2);
-            padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            padding: 40px; border: 1px solid rgba(255,255,255,0.2);
         }
-        
         h1 {
-            color: #2d3748;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
+            color: #2d3748; margin-bottom: 30px; font-size: 2.5rem; font-weight: 700; text-align: center;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-
-        h2 {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #2d3748;
-            font-size: 0.95rem;
-            transition: color 0.2s ease;
-        }
-
-        .required::after {
-            content: " *";
-            color: #e53e3e;
-        }
-        
+        h2 { color: #4a5568; margin-bottom: 20px; font-size: 1.5rem; font-weight: 600; text-align: center; }
+        .form-group { margin-bottom: 25px; position: relative; opacity: 1; transform: translateY(0); }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #2d3748; font-size: 0.95rem; transition: color 0.2s ease; }
+        .required::after { content: " *"; color: #e53e3e; }
         input, select, textarea {
-            width: 100%;
-            padding: 15px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            background: rgba(255, 255, 255, 0.9);
-            transition: all 0.3s ease;
-            outline: none;
+            width: 100%; padding: 15px 18px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px;
+            font-family: inherit; background: rgba(255,255,255,0.9); transition: all 0.3s ease; outline: none;
         }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: white;
-            transform: translateY(-1px);
-        }
-
-        input:disabled, select:disabled, textarea:disabled {
-            background: #f7fafc;
-            color: #a0aec0;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        
-        textarea {
-            height: 120px;
-            resize: vertical;
-            font-family: inherit;
-        }
-        
+        input:focus, select:focus, textarea:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); background: white; transform: translateY(-1px); }
+        input:disabled, select:disabled, textarea:disabled { background: #f7fafc; color: #a0aec0; cursor: not-allowed; opacity: 0.6; }
+        textarea { height: 120px; resize: vertical; font-family: inherit; }
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px 32px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 32px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600; cursor: pointer; margin-right: 15px; transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3); position: relative; overflow: hidden;
         }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button:disabled {
-            background: #a0aec0;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        button:disabled::before {
-            display: none;
-        }
-        
-        .signin-section {
-            text-align: center;
-            padding: 60px 0;
-        }
-        
-        .signin-section .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #667eea;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
+        button::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+        button:hover::before { left: 100%; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #a0aec0; cursor: not-allowed; transform: none; box-shadow: none; }
+        button:disabled::before { display: none; }
+        .signin-section { text-align: center; padding: 60px 0; }
+        .signin-section .icon { font-size: 4rem; margin-bottom: 20px; color: #667eea; }
+        .hidden { display: none; }
         .dynamic-fields {
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 30px;
-            border-radius: 16px;
-            margin-top: 20px;
-            border-left: 4px solid #667eea;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px; border-radius: 16px; margin-top: 20px; border-left: 4px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        
-        .dynamic-fields h3 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: #2d3748;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        
-        .result {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-align: center;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .result.success {
-            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-            color: #22543d;
-            border: 2px solid #68d391;
-        }
-        
-        .result.error {
-            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-            color: #742a2a;
-            border: 2px solid #fc8181;
-        }
-        
-        .result.loading {
-            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
-            color: #2a69ac;
-            border: 2px solid #63b3ed;
-        }
-
-        /* Loading Spinner and Overlay */
+        .dynamic-fields h3 { margin-top: 0; margin-bottom: 20px; color: #2d3748; font-size: 1.3rem; font-weight: 600; }
+        .result { margin-top: 25px; padding: 20px; border-radius: 12px; font-weight: 600; text-align: center; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+        .result.success { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); color: #22543d; border: 2px solid #68d391; }
+        .result.error { background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%); color: #742a2a; border: 2px solid #fc8181; }
+        .result.loading { background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%); color: #2a69ac; border: 2px solid #63b3ed; }
         .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 20px;
-            z-index: 100;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 20px; z-index: 100;
         }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: #4a5568;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .loading-subtext {
-            color: #718096;
-            font-size: 0.9rem;
-            text-align: center;
-            max-width: 250px;
-        }
-
-        /* Form Loading States */
-        .form-loading input,
-        .form-loading select,
-        .form-loading textarea,
-        .form-loading button {
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        /* Enhanced animations */
-        .form-group {
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .form-group:nth-child(1) { animation-delay: 0.1s; }
-        .form-group:nth-child(2) { animation-delay: 0.2s; }
-        .form-group:nth-child(3) { animation-delay: 0.3s; }
-        .form-group:nth-child(4) { animation-delay: 0.4s; }
-        .form-group:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive design */
+        .spinner { width: 60px; height: 60px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+        .loading-text { color: #4a5568; font-size: 1.1rem; font-weight: 600; text-align: center; margin-bottom: 10px; }
+        .loading-subtext { color: #718096; font-size: 0.9rem; text-align: center; max-width: 250px; }
+        .form-loading input, .form-loading select, .form-loading textarea, .form-loading button { pointer-events: none; opacity: 0.6; }
+        .success-icon { display: inline-block; width: 20px; height: 20px; border-radius: 50%; background: #48bb78; margin-right: 10px; position: relative; }
+        .success-icon::after { content: '✓'; position: absolute; color: white; font-size: 12px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .error-icon { display: inline-block; width: 20px; height: 20px; border-radius: 50%; background: #f56565; margin-right: 10px; position: relative; }
+        .error-icon::after { content: '!'; position: absolute; color: white; font-size: 14px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-            }
-            
-            .form-container {
-                padding: 25px;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            input, select, textarea {
-                padding: 12px 15px;
-            }
-            
-            button {
-                padding: 14px 28px;
-                font-size: 15px;
-            }
-        }
-
-        /* Success checkmark animation */
-        .success-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #48bb78;
-            margin-right: 10px;
-            position: relative;
-        }
-
-        .success-icon::after {
-            content: '✓';
-            position: absolute;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Error icon */
-        .error-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #f56565;
-            margin-right: 10px;
-            position: relative;
-        }
-
-        .error-icon::after {
-            content: '!';
-            position: absolute;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            .container { margin: 10px; }
+            .form-container { padding: 25px; border-radius: 15px; }
+            h1 { font-size: 2rem; }
+            input, select, textarea { padding: 12px 15px; }
+            button { padding: 14px 28px; font-size: 15px; }
         }
     </style>
 </head>
 <body>
     <div class="background-pattern"></div>
-    
+
     <div class="container">
         <!-- Sign-in Section -->
         <div id="signinSection" class="signin-section">
@@ -415,36 +114,43 @@
                 </div>
 
                 <h1>📋 Report an Incident</h1>
-                
+
                 <form id="incidentForm" class="form-loading">
                     <div class="form-group">
-                        <label for="incidentType" class="required">Incident Type</label>
+                        <label for="incidentType" class="required">What work related event do you want to report?</label>
                         <select id="incidentType" required disabled>
-                            <option value="">Loading incident types...</option>
+                            <option value="">Select event type...</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="title" class="required">Incident Title</label>
-                        <input type="text" id="title" required disabled placeholder="Brief description of the incident">
-                    </div>
+                    <!-- Removed "Incident Title" per requirements -->
 
                     <div class="form-group">
-                        <label for="occurredAt" class="required">Date and Time Occurred</label>
+                        <label for="occurredAt" class="required">When did the event occur?</label>
                         <input type="datetime-local" id="occurredAt" required disabled>
                     </div>
 
                     <div class="form-group">
-                        <label for="location">Location</label>
+                        <label for="location">Where did the incident occur?</label>
                         <input type="text" id="location" disabled placeholder="Loading locations...">
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Description</label>
+                        <label for="description">Please describe the event</label>
                         <textarea id="description" disabled placeholder="Detailed description of what happened"></textarea>
                     </div>
 
-                    <!-- Dynamic Fields Section -->
+                    <div class="form-group">
+                        <label for="workOrder" class="required">Is there a work order open</label>
+                        <select id="workOrder" required disabled>
+                            <option value="">Select a response...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic Fields Section (illness/injury, plus any others you keep) -->
                     <div id="dynamicFields"></div>
 
                     <button type="submit" disabled>
@@ -458,10 +164,10 @@
 
     <!-- MSAL Library -->
     <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
-    
+
     <script>
         console.log("=== SCRIPT STARTED - PAGE LOADED ===");
-        
+
         // Configuration - UPDATE THESE VALUES
         const msalConfig = {
             auth: {
@@ -469,15 +175,13 @@
                 authority: "https://login.microsoftonline.com/7002c3bb-3e4e-4ab7-8b11-65cd3513ecbe",
                 redirectUri: window.location.origin + "/"
             },
-            cache: {
-                cacheLocation: "sessionStorage"
-            }
+            cache: { cacheLocation: "sessionStorage" }
         };
 
         // IMPORTANT: UPDATE THIS URL with your actual APIM URL
         const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
         const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
-        
+
         // Data source configurations
         const dataverseScope = "https://masterdatatoolsdev.crm.dynamics.com/user_impersonation";
         const fabricScope = "https://analysis.windows.net/powerbi/api/Dataset.Read.All";
@@ -494,21 +198,14 @@
 
         async function acquireToken(scopes = [apiScope]) {
             const account = getCurrentAccount();
-            if (!account) {
-                throw new Error("No account found");
-            }
+            if (!account) { throw new Error("No account found"); }
 
             try {
-                const result = await msalInstance.acquireTokenSilent({
-                    account: account,
-                    scopes: scopes
-                });
+                const result = await msalInstance.acquireTokenSilent({ account, scopes });
                 return result.accessToken;
             } catch (error) {
                 console.log("Silent token acquisition failed, acquiring token using popup");
-                const result = await msalInstance.acquireTokenPopup({
-                    scopes: scopes
-                });
+                const result = await msalInstance.acquireTokenPopup({ scopes });
                 return result.accessToken;
             }
         }
@@ -519,80 +216,56 @@
             document.getElementById("incidentForm").classList.add("form-loading");
         }
 
+        // ONLY enable incident type after loading;
+        // keep the rest disabled until a real selection is made.
         function hideLoading() {
             document.getElementById("loadingOverlay").style.display = "none";
             document.getElementById("incidentForm").classList.remove("form-loading");
-            enableFormElements();
+            enableOnlyIncidentType();
         }
 
-        function enableFormElements() {
-            const formElements = document.querySelectorAll("#incidentForm input, #incidentForm select, #incidentForm textarea, #incidentForm button");
-            formElements.forEach(element => {
-                element.disabled = false;
+        function enableOnlyIncidentType() {
+            const all = document.querySelectorAll("#incidentForm input, #incidentForm select, #incidentForm textarea, #incidentForm button");
+            all.forEach(el => el.disabled = true);
+            const incidentTypeSelect = document.getElementById("incidentType");
+            incidentTypeSelect.disabled = false;
+        }
+
+        function setRestEnabled(isEnabled) {
+            const selectors = ["#occurredAt", "#location", "#description", "#workOrder", "#incidentForm button[type='submit']"];
+            selectors.forEach(sel => {
+                const el = document.querySelector(sel);
+                if (el) el.disabled = !isEnabled;
             });
+
+            // Also enable/disable any dynamic child inputs when toggling
+            const dynamicInputs = document.querySelectorAll("#dynamicFields input, #dynamicFields select, #dynamicFields textarea");
+            dynamicInputs.forEach(el => el.disabled = !isEnabled);
         }
 
-        function disableFormElements() {
-            const formElements = document.querySelectorAll("#incidentForm input, #incidentForm select, #incidentForm textarea, #incidentForm button");
-            formElements.forEach(element => {
-                element.disabled = true;
-            });
-        }
-
-        // Data fetching function - now calls Logic App via APIM
+        // Data fetching function - calls Logic App via APIM
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
-            console.log("API Base URL:", apiBaseUrl);
-            console.log("Full URL:", `${apiBaseUrl}/referencedata`);
-            
-            // TEMPORARY: Test direct Logic App URL
-            const testURL = "https://prod-76.eastus.logic.azure.com:443/workflows/[YOUR-LOGIC-APP-WORKFLOW-ID]/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=[YOUR-SIG]";
-            console.log("Testing direct Logic App URL (replace with yours):", testURL);
-            
             try {
-                console.log("Making fetch request...");
                 const response = await fetch(`${apiBaseUrl}/referencedata`, {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
+                    headers: { "Content-Type": "application/json" }
                 });
 
-                console.log("Response received:");
-                console.log("- Status:", response.status);
-                console.log("- Status Text:", response.statusText);
-                console.log("- Headers:", [...response.headers.entries()]);
+                console.log("Response received:", response.status, response.statusText);
 
                 if (response.ok) {
-                    console.log("Response OK, parsing JSON...");
                     const data = await response.json();
                     console.log("=== RAW RESPONSE DATA ===");
                     console.log(JSON.stringify(data, null, 2));
-                    console.log("=== END RAW DATA ===");
-                    
-                    // Check data structure
-                    console.log("Data structure analysis:");
-                    console.log("- Has incidentTypes:", !!data.incidentTypes);
-                    console.log("- incidentTypes length:", data.incidentTypes?.length || 0);
-                    console.log("- Has locations:", !!data.locations);
-                    console.log("- Has locations.ResultSets:", !!data.locations?.ResultSets);
-                    console.log("- Has locations.ResultSets.Table1:", !!data.locations?.ResultSets?.Table1);
-                    console.log("- Locations count:", data.locations?.ResultSets?.Table1?.length || 0);
-                    
                     return data;
                 } else {
-                    console.error("Response NOT OK");
                     const errorText = await response.text();
-                    console.error("Error response body:", errorText);
                     console.error("Failed to fetch reference data:", response.status, errorText);
                     return null;
                 }
             } catch (error) {
-                console.error("=== FETCH ERROR ===");
-                console.error("Error type:", error.constructor.name);
-                console.error("Error message:", error.message);
-                console.error("Full error:", error);
-                console.error("=== END FETCH ERROR ===");
+                console.error("=== FETCH ERROR ===", error);
                 return null;
             }
         }
@@ -600,132 +273,74 @@
         // Populate dropdowns with data
         async function loadDropdownData() {
             console.log("=== Starting loadDropdownData ===");
-            showLoading(); // Show loading overlay
-            
+            showLoading();
+
             const incidentTypeSelect = document.getElementById("incidentType");
             const locationInput = document.getElementById("location");
 
-            console.log("Form elements found:");
-            console.log("- incidentTypeSelect:", !!incidentTypeSelect);
-            console.log("- locationInput:", !!locationInput);
-
             try {
-                // Load data from Logic App
-                console.log("Calling fetchReferenceData...");
                 const referenceData = await fetchReferenceData();
-                console.log("fetchReferenceData returned:", !!referenceData);
-                
-                if (referenceData) {
-                    console.log("=== Processing reference data ===");
-                    
-                    // Populate incident types
-                    if (referenceData.incidentTypes && referenceData.incidentTypes.length > 0) {
-                        console.log(`Processing ${referenceData.incidentTypes.length} incident types...`);
-                        incidentTypeSelect.innerHTML = '<option value="">Select incident type...</option>';
-                        
-                        referenceData.incidentTypes.forEach((type, index) => {
-                            console.log(`Adding incident type ${index + 1}:`, {
-                                id: type.crb18_humit_incidenttypeid,
-                                name: type.crb18_eventtypename
-                            });
-                            const option = document.createElement('option');
-                            option.value = type.crb18_humit_incidenttypeid;
-                            option.textContent = type.crb18_eventtypename;
-                            incidentTypeSelect.appendChild(option);
-                        });
-                        console.log("Incident types dropdown populated successfully");
-                    } else {
-                        console.log("No incident types found, using fallback");
-                        console.log("incidentTypes exists:", !!referenceData.incidentTypes);
-                        console.log("incidentTypes length:", referenceData.incidentTypes?.length);
-                        
-                        // Fallback to hardcoded values
-                        incidentTypeSelect.innerHTML = `
-                            <option value="">Select incident type...</option>
-                            <option value="injury">Injury</option>
-                            <option value="near-miss">Near Miss</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="property-damage">Property Damage</option>
-                            <option value="security">Security</option>
-                            <option value="other">Other</option>
-                        `;
-                    }
 
-                    // Populate locations - handle nested structure
-                    console.log("=== Processing locations ===");
-                    const locations = referenceData.locations?.ResultSets?.Table1;
-                    console.log("Extracted locations array:", !!locations);
-                    console.log("Locations array length:", locations?.length || 0);
-                    
-                    if (locations && locations.length > 0) {
-                        console.log(`Processing ${locations.length} locations...`);
-                        
-                        // Replace text input with dropdown
-                        const locationGroup = locationInput.parentElement;
-                        console.log("Location parent element found:", !!locationGroup);
-                        
-                        const newSelect = document.createElement('select');
-                        newSelect.id = 'location';
-                        newSelect.className = locationInput.className;
-                        newSelect.innerHTML = '<option value="">Select location...</option>';
-                        
-                        locations.forEach((location, index) => {
-                            if (index < 5) { // Log first 5 for debugging
-                                console.log(`Adding location ${index + 1}:`, {
-                                    code: location.Humacyte_Location,
-                                    description: location.Humacyte_Location_Description,
-                                    details: location.Humacyte_Location_Details
-                                });
-                            }
-                            const option = document.createElement('option');
-                            option.value = location.Humacyte_Location;
-                            option.textContent = `${location.Humacyte_Location} - ${location.Humacyte_Location_Description}`;
-                            option.title = location.Humacyte_Location_Details;
-                            newSelect.appendChild(option);
-                        });
-                        
-                        console.log("Replacing location input with dropdown...");
-                        locationGroup.replaceChild(newSelect, locationInput);
-                        console.log(`Locations dropdown created with ${locations.length} options`);
-                    } else {
-                        console.log("No locations found, keeping text input");
-                        locationInput.placeholder = "Building, area, or specific location";
-                        console.log("Debug info:");
-                        console.log("- referenceData.locations:", !!referenceData.locations);
-                        console.log("- referenceData.locations keys:", referenceData.locations ? Object.keys(referenceData.locations) : 'N/A');
-                        if (referenceData.locations?.ResultSets) {
-                            console.log("- ResultSets keys:", Object.keys(referenceData.locations.ResultSets));
-                        }
-                    }
+                // INCIDENT TYPES
+                if (referenceData?.incidentTypes?.length) {
+                    incidentTypeSelect.innerHTML = '<option value="">Select event type...</option>';
+                    referenceData.incidentTypes.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.crb18_humit_incidenttypeid;
+                        option.textContent = type.crb18_eventtypename;
+                        incidentTypeSelect.appendChild(option);
+                    });
                 } else {
-                    console.log("No reference data received, using fallback values");
-                    // Fallback to hardcoded incident types if API fails
+                    // Fallback
                     incidentTypeSelect.innerHTML = `
-                        <option value="">Select incident type...</option>
+                        <option value="">Select event type...</option>
                         <option value="injury">Injury</option>
+                        <option value="illness">Illness</option>
                         <option value="near-miss">Near Miss</option>
                         <option value="environmental">Environmental</option>
                         <option value="property-damage">Property Damage</option>
                         <option value="security">Security</option>
                         <option value="other">Other</option>
                     `;
+                }
+
+                // LOCATIONS (replace text input with select if data present)
+                const locations = referenceData?.locations?.ResultSets?.Table1;
+                if (locations?.length) {
+                    const locationGroup = locationInput.parentElement;
+                    const newSelect = document.createElement('select');
+                    newSelect.id = 'location';
+                    newSelect.innerHTML = '<option value="">Select location...</option>';
+
+                    locations.forEach(loc => {
+                        const opt = document.createElement('option');
+                        opt.value = loc.Humacyte_Location;
+                        opt.textContent = `${loc.Humacyte_Location} - ${loc.Humacyte_Location_Description}`;
+                        opt.title = loc.Humacyte_Location_Details;
+                        newSelect.appendChild(opt);
+                    });
+
+                    locationGroup.replaceChild(newSelect, locationInput);
+                } else {
+                    // keep text input; just set placeholder
                     locationInput.placeholder = "Building, area, or specific location";
                 }
             } catch (error) {
                 console.error("Error in loadDropdownData:", error);
-                // Ensure fallback values are set even if there's an error
+                // Fallback incident types
                 incidentTypeSelect.innerHTML = `
-                    <option value="">Select incident type...</option>
+                    <option value="">Select event type...</option>
                     <option value="injury">Injury</option>
+                    <option value="illness">Illness</option>
                     <option value="near-miss">Near Miss</option>
                     <option value="environmental">Environmental</option>
                     <option value="property-damage">Property Damage</option>
                     <option value="security">Security</option>
                     <option value="other">Other</option>
                 `;
-                locationInput.placeholder = "Building, area, or specific location";
+                if (locationInput) locationInput.placeholder = "Building, area, or specific location";
             } finally {
-                hideLoading(); // Hide loading overlay when done
+                hideLoading(); // Enable ONLY the event type select
             }
             console.log("=== loadDropdownData complete ===");
         }
@@ -736,11 +351,9 @@
             const originalText = button.textContent;
             button.textContent = "🔄 Signing in...";
             button.disabled = true;
-            
+
             try {
-                await msalInstance.loginPopup({
-                    scopes: [apiScope, dataverseScope, fabricScope]
-                });
+                await msalInstance.loginPopup({ scopes: [apiScope, dataverseScope, fabricScope] });
                 showMainForm();
             } catch (error) {
                 console.error("Login failed:", error);
@@ -760,184 +373,162 @@
 
         function showResult(message, type) {
             const resultDiv = document.getElementById("result");
-            
-            // Add appropriate icon
             let icon = '';
-            if (type === 'success') {
-                icon = '<span class="success-icon"></span>';
-            } else if (type === 'error') {
-                icon = '<span class="error-icon"></span>';
-            }
-            
+            if (type === 'success') icon = '<span class="success-icon"></span>';
+            else if (type === 'error') icon = '<span class="error-icon"></span>';
             resultDiv.innerHTML = icon + message;
             resultDiv.className = "result " + type;
         }
 
-        // Dynamic form fields based on incident type
-        document.getElementById("incidentType").addEventListener("change", function() {
-            const incidentType = this.value;
-            const dynamicFieldsDiv = document.getElementById("dynamicFields");
-            
-            dynamicFieldsDiv.innerHTML = "";
+        // Build Illness/Injury subform
+        function buildIllnessInjurySubform() {
+            return `
+                <div class="dynamic-fields" id="injuryIllnessSection">
+                    <h3>🩺 Injury/Illness Details</h3>
+                    <div class="form-group">
+                        <label for="beforeEvent">What happened just before the event occurred?</label>
+                        <textarea id="beforeEvent" placeholder="Describe the context leading up to the event"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="shiftBegin">What time did the work shift begin?</label>
+                        <input type="datetime-local" id="shiftBegin">
+                    </div>
+                    <div class="form-group">
+                        <label for="witnesses">Were there any witnesses?</label>
+                        <select id="witnesses">
+                            <option value="">Select a response...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group hidden" id="witnessNamesGroup">
+                        <label for="witnessNames">List witnesses</label>
+                        <input type="text" id="witnessNames" placeholder="Name(s) of witnesses">
+                    </div>
+                </div>
+            `;
+        }
 
-            if (incidentType === "injury") {
-                dynamicFieldsDiv.innerHTML = `
-                    <div class="dynamic-fields">
-                        <h3>🩹 Injury Details</h3>
-                        <div class="form-group">
-                            <label for="injurySeverity">Injury Severity</label>
-                            <select id="injurySeverity">
-                                <option value="first-aid">First Aid</option>
-                                <option value="medical-treatment">Medical Treatment</option>
-                                <option value="recordable">Recordable</option>
-                                <option value="lost-time">Lost Time</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="bodyPart">Body Part Affected</label>
-                            <input type="text" id="bodyPart" placeholder="e.g., hand, back, leg">
-                        </div>
-                        <div class="form-group">
-                            <label for="medicalAttention">Medical Attention Required?</label>
-                            <select id="medicalAttention">
-                                <option value="no">No</option>
-                                <option value="yes">Yes</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-            } else if (incidentType === "environmental") {
-                dynamicFieldsDiv.innerHTML = `
-                    <div class="dynamic-fields">
-                        <h3>🌍 Environmental Details</h3>
-                        <div class="form-group">
-                            <label for="spillType">Type of Spill/Release</label>
-                            <select id="spillType">
-                                <option value="chemical">Chemical</option>
-                                <option value="oil">Oil</option>
-                                <option value="water">Water</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="spillVolume">Estimated Volume</label>
-                            <input type="text" id="spillVolume" placeholder="e.g., 5 gallons, 2 liters">
-                        </div>
-                        <div class="form-group">
-                            <label for="containment">Was spill contained?</label>
-                            <select id="containment">
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                                <option value="partial">Partially</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-            } else if (incidentType === "near-miss") {
-                dynamicFieldsDiv.innerHTML = `
-                    <div class="dynamic-fields">
-                        <h3>⚠️ Near Miss Details</h3>
-                        <div class="form-group">
-                            <label for="potentialConsequence">Potential Consequence</label>
-                            <select id="potentialConsequence">
-                                <option value="minor-injury">Minor Injury</option>
-                                <option value="major-injury">Major Injury</option>
-                                <option value="property-damage">Property Damage</option>
-                                <option value="environmental">Environmental Impact</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="preventedBy">What prevented the incident?</label>
-                            <textarea id="preventedBy" placeholder="Describe what stopped this from becoming an actual incident"></textarea>
-                        </div>
-                    </div>
-                `;
+        function clearDynamicFields() {
+            document.getElementById("dynamicFields").innerHTML = "";
+        }
+
+        // Dynamic form fields based on incident type selection
+        document.addEventListener("change", function (ev) {
+            if (ev.target && ev.target.id === "incidentType") {
+                const select = ev.target;
+                const val = String(select.value || "").trim();
+                const enabled = val !== "";
+
+                // Enable/disable rest of the form
+                setRestEnabled(enabled);
+
+                // Reset dynamic area
+                clearDynamicFields();
+
+                if (!enabled) return;
+
+                const text = (select.options[select.selectedIndex]?.text || "").toLowerCase();
+                // Show Illness/Injury subform if name contains 'illness' or 'injury'
+                if (text.includes("illness") || text.includes("injury")) {
+                    document.getElementById("dynamicFields").innerHTML = buildIllnessInjurySubform();
+
+                    // Wire up witness show/hide
+                    const witnessesSel = document.getElementById("witnesses");
+                    const witnessNamesGroup = document.getElementById("witnessNamesGroup");
+                    witnessesSel.addEventListener("change", () => {
+                        if (witnessesSel.value === "yes") {
+                            witnessNamesGroup.classList.remove("hidden");
+                        } else {
+                            witnessNamesGroup.classList.add("hidden");
+                            const wn = document.getElementById("witnessNames");
+                            if (wn) wn.value = "";
+                        }
+                    });
+                }
             }
         });
 
         // Form submission
         document.getElementById("incidentForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+
             const submitButton = e.target.querySelector('button[type="submit"]');
             const submitButtonText = document.getElementById("submitButtonText");
             const originalText = submitButtonText.textContent;
-            
+
             submitButton.disabled = true;
             submitButtonText.textContent = "🔄 Submitting...";
             showResult("Submitting incident report...", "loading");
 
             try {
-                // Still acquire token for frontend authentication, but don't send it to API
-                const token = await acquireToken();
-                
+                // Acquire token (not forwarded to API per your current design)
+                await acquireToken();
+
                 // Collect form data
                 const incidentType = document.getElementById("incidentType").value;
-                const incidentTypeLower = incidentType.toLowerCase();
-                
+                const incidentTypeText = (document.getElementById("incidentType").options[document.getElementById("incidentType").selectedIndex]?.text || "");
+                const incidentTypeLower = incidentTypeText.toLowerCase();
+
+                // Might still be an <input> or replaced by <select>
+                const locationEl = document.getElementById("location");
+                const locationVal = locationEl ? locationEl.value : "";
+
                 const formData = {
-                    incidentTypeId: incidentType,
-                    title: document.getElementById("description").value?.substring(0, 100) || "Incident Report", // Use description as title, truncated
+                    incidentTypeId: incidentType,           // underlying id/value
+                    incidentTypeName: incidentTypeText,     // human-readable text
+                    title: (document.getElementById("description").value || "").substring(0, 100) || "Incident Report",
                     occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
-                    location: document.getElementById("location").value,
+                    location: locationVal,
                     description: document.getElementById("description").value,
-                    reportedByEmail: getCurrentAccount().username,
+                    reportedByEmail: getCurrentAccount()?.username || "",
                     workOrder: document.getElementById("workOrder").value,
-                    customFields: {
-                        injury: incidentTypeLower.includes("injury"),
-                        illness: incidentTypeLower.includes("illness"),
-                        rootCause: ""
-                    }
+                    customFields: { injury: false, illness: false, rootCause: "" }
                 };
 
-                // Set rootCause based on incident type and collected dynamic fields
-                if (incidentTypeLower.includes("illness") || incidentTypeLower.includes("injury")) {
+                // Illness/Injury subform handling
+                if (incidentTypeLower.includes("injury") || incidentTypeLower.includes("illness")) {
                     const beforeEvent = document.getElementById("beforeEvent")?.value || "";
                     const shiftBegin = document.getElementById("shiftBegin")?.value || "";
                     const witnesses = document.getElementById("witnesses")?.value || "";
                     const witnessNames = document.getElementById("witnessNames")?.value || "";
-                    
+
+                    formData.customFields.injury = incidentTypeLower.includes("injury");
+                    formData.customFields.illness = incidentTypeLower.includes("illness");
                     formData.customFields.beforeEvent = beforeEvent;
-                    formData.customFields.shiftBegin = shiftBegin;
+                    formData.customFields.shiftBegin = shiftBegin ? new Date(shiftBegin).toISOString() : "";
                     formData.customFields.witnesses = witnesses;
                     formData.customFields.witnessNames = witnessNames;
-                    formData.customFields.rootCause = `${incidentTypeLower.includes("injury") ? "Injury" : "Illness"}: Before event - ${beforeEvent}, Shift began: ${shiftBegin}, Witnesses: ${witnesses}${witnesses === "yes" ? " (" + witnessNames + ")" : ""}`;
-                } else if (incidentType === "environmental") {
-                    const spillType = document.getElementById("spillType")?.value || "";
-                    const spillVolume = document.getElementById("spillVolume")?.value || "";
-                    const containment = document.getElementById("containment")?.value || "";
-                    formData.customFields.rootCause = `Environmental: ${spillType} spill of ${spillVolume}, containment: ${containment}`;
-                } else if (incidentType === "near-miss") {
-                    const potentialConsequence = document.getElementById("potentialConsequence")?.value || "";
-                    const preventedBy = document.getElementById("preventedBy")?.value || "";
-                    formData.customFields.rootCause = `Near Miss: potential ${potentialConsequence}, prevented by: ${preventedBy}`;
+
+                    const label = formData.customFields.injury ? "Injury" : "Illness";
+                    formData.customFields.rootCause =
+                        `${label}: Before event - ${beforeEvent || "N/A"}, ` +
+                        `Shift began: ${shiftBegin || "N/A"}, ` +
+                        `Witnesses: ${witnesses || "N/A"}${witnesses === "yes" && witnessNames ? " (" + witnessNames + ")" : ""}`;
                 } else {
+                    // Default root cause fallback to description
                     formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
                 }
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
-                // Submit to API WITHOUT Authorization header to avoid dual authorization
+                // Submit to API WITHOUT Authorization header (per your current APIM design)
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(formData)
                 });
 
                 if (response.ok) {
-                    const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
                     showResult("Incident report submitted successfully! Reference ID: " + (result.incidentId || "Generated"), "success");
                     document.getElementById("incidentForm").reset();
-                    document.getElementById("dynamicFields").innerHTML = "";
+                    clearDynamicFields();
+                    // After reset, keep only event type enabled
+                    enableOnlyIncidentType();
                 } else {
                     const errorText = await response.text();
                     console.error("Full error response:", errorText);
-                    console.error("Response headers:", [...response.headers.entries()]);
-                    console.error("Response status:", response.status);
-                    console.error("Response statusText:", response.statusText);
-                    console.error("Form data sent:", JSON.stringify(formData, null, 2));
                     showResult("Submission failed: " + response.status + " - " + errorText, "error");
                 }
 
@@ -953,9 +544,7 @@
         // Check if user is already signed in
         window.addEventListener("load", async () => {
             const account = getCurrentAccount();
-            if (account) {
-                await showMainForm();
-            }
+            if (account) { await showMainForm(); }
         });
     </script>
 </body>
