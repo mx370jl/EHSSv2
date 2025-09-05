@@ -237,11 +237,11 @@
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
             console.log("API Base URL:", apiBaseUrl);
-            console.log("Full URL:", `${apiBaseUrl}/reference-data`);
+            console.log("Full URL:", `${apiBaseUrl}/referencedata`);
             
             try {
                 console.log("Making fetch request...");
-                const response = await fetch(`${apiBaseUrl}/reference-data`, {
+                const response = await fetch(`${apiBaseUrl}/referencedata`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
