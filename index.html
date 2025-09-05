@@ -341,6 +341,7 @@
             showResult("Submitting incident report...", "loading");
 
             try {
+                // Still acquire token for frontend authentication, but don't send it to API
                 const token = await acquireToken();
                 
                 // Collect form data
@@ -380,11 +381,10 @@
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
-                // Submit to API with Authorization header
+                // Submit to API WITHOUT Authorization header to avoid dual authorization
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
                     headers: {
-                        "Authorization": "Bearer " + token,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify(formData)
