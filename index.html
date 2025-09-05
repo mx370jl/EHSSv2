@@ -293,10 +293,6 @@
 
         // Populate dropdowns with data
         async function loadDropdownData() {
-            // Show loading overlay immediately
-            showLoadingOverlay();
-            
-            alert("loadDropdownData function started!"); // DEBUG TEST - REMOVE LATER
             console.log("=== Starting loadDropdownData ===");
             const incidentTypeSelect = document.getElementById("incidentType");
             const locationInput = document.getElementById("location");
@@ -420,11 +416,8 @@
                     <option value="security">Security</option>
                     <option value="other">Other</option>
                 `;
-            } finally {
-                // Always hide loading overlay when done (success or failure)
-                hideLoadingOverlay();
-                console.log("=== loadDropdownData complete ===");
             }
+            console.log("=== loadDropdownData complete ===");
         }
 
         // Sign-in functionality
