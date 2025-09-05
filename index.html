@@ -415,10 +415,10 @@
         });
 
         // Check if user is already signed in
-        window.addEventListener("load", () => {
+        window.addEventListener("load", async () => {
             const account = getCurrentAccount();
             if (account) {
-                showMainForm();
+                await showMainForm();
             }
         });
     </script>
