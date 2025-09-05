@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incident Reporting</title>
+    <title>Incident Reporting - UPDATE TEST</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -180,6 +180,8 @@
     <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
     
     <script>
+        console.log("=== SCRIPT STARTED - PAGE LOADED ===");
+        
         // Configuration - UPDATE THESE VALUES
         const msalConfig = {
             auth: {
@@ -195,6 +197,12 @@
         // IMPORTANT: UPDATE THIS URL with your actual APIM URL
         const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
         const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
+        
+        // Data source configurations
+        const dataverseScope = "https://masterdatatoolsdev.crm.dynamics.com/user_impersonation";
+        const fabricScope = "https://analysis.windows.net/powerbi/api/Dataset.Read.All";
+        const dataverseUrl = "https://masterdatatoolsdev.crm.dynamics.com/api/data/v9.2";
+        const fabricEndpoint = "xpbqe4coh23uvcyrmxgtke7mxy-2cuq2agisxqehjzz7dgjlakq3i.datawarehouse.fabric.microsoft.com";
 
         // Initialize MSAL
         const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -204,7 +212,7 @@
             return msalInstance.getAllAccounts()[0];
         }
 
-        async function acquireToken() {
+        async function acquireToken(scopes = [apiScope]) {
             const account = getCurrentAccount();
             if (!account) {
                 throw new Error("No account found");
@@ -213,23 +221,193 @@
             try {
                 const result = await msalInstance.acquireTokenSilent({
                     account: account,
-                    scopes: [apiScope]
+                    scopes: scopes
                 });
                 return result.accessToken;
             } catch (error) {
                 console.log("Silent token acquisition failed, acquiring token using popup");
                 const result = await msalInstance.acquireTokenPopup({
-                    scopes: [apiScope]
+                    scopes: scopes
                 });
                 return result.accessToken;
             }
+        }
+
+        // Data fetching function - now calls Logic App via APIM
+        async function fetchReferenceData() {
+            console.log("=== Starting fetchReferenceData ===");
+            console.log("API Base URL:", apiBaseUrl);
+            console.log("Full URL:", `${apiBaseUrl}/reference-data`);
+            
+            try {
+                console.log("Making fetch request...");
+                const response = await fetch(`${apiBaseUrl}/reference-data`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                console.log("Response received:");
+                console.log("- Status:", response.status);
+                console.log("- Status Text:", response.statusText);
+                console.log("- Headers:", [...response.headers.entries()]);
+
+                if (response.ok) {
+                    console.log("Response OK, parsing JSON...");
+                    const data = await response.json();
+                    console.log("=== RAW RESPONSE DATA ===");
+                    console.log(JSON.stringify(data, null, 2));
+                    console.log("=== END RAW DATA ===");
+                    
+                    // Check data structure
+                    console.log("Data structure analysis:");
+                    console.log("- Has incidentTypes:", !!data.incidentTypes);
+                    console.log("- incidentTypes length:", data.incidentTypes?.length || 0);
+                    console.log("- Has locations:", !!data.locations);
+                    console.log("- Has locations.ResultSets:", !!data.locations?.ResultSets);
+                    console.log("- Has locations.ResultSets.Table1:", !!data.locations?.ResultSets?.Table1);
+                    console.log("- Locations count:", data.locations?.ResultSets?.Table1?.length || 0);
+                    
+                    return data;
+                } else {
+                    console.error("Response NOT OK");
+                    const errorText = await response.text();
+                    console.error("Error response body:", errorText);
+                    console.error("Failed to fetch reference data:", response.status, errorText);
+                    return null;
+                }
+            } catch (error) {
+                console.error("=== FETCH ERROR ===");
+                console.error("Error type:", error.constructor.name);
+                console.error("Error message:", error.message);
+                console.error("Full error:", error);
+                console.error("=== END FETCH ERROR ===");
+                return null;
+            }
+        }
+
+        // Populate dropdowns with data
+        async function loadDropdownData() {
+            alert("loadDropdownData function started!"); // DEBUG TEST - REMOVE LATER
+            console.log("=== Starting loadDropdownData ===");
+            const incidentTypeSelect = document.getElementById("incidentType");
+            const locationInput = document.getElementById("location");
+
+            console.log("Form elements found:");
+            console.log("- incidentTypeSelect:", !!incidentTypeSelect);
+            console.log("- locationInput:", !!locationInput);
+
+            // Show loading state
+            incidentTypeSelect.innerHTML = '<option value="">Loading incident types...</option>';
+            console.log("Set loading state for incident types");
+            
+            // Load data from Logic App
+            console.log("Calling fetchReferenceData...");
+            const referenceData = await fetchReferenceData();
+            console.log("fetchReferenceData returned:", !!referenceData);
+            
+            if (referenceData) {
+                console.log("=== Processing reference data ===");
+                
+                // Populate incident types
+                if (referenceData.incidentTypes && referenceData.incidentTypes.length > 0) {
+                    console.log(`Processing ${referenceData.incidentTypes.length} incident types...`);
+                    incidentTypeSelect.innerHTML = '<option value="">Select incident type...</option>';
+                    
+                    referenceData.incidentTypes.forEach((type, index) => {
+                        console.log(`Adding incident type ${index + 1}:`, {
+                            id: type.crb18_humit_incidenttypeid,
+                            name: type.crb18_eventtypename
+                        });
+                        const option = document.createElement('option');
+                        option.value = type.crb18_humit_incidenttypeid;
+                        option.textContent = type.crb18_eventtypename;
+                        incidentTypeSelect.appendChild(option);
+                    });
+                    console.log("Incident types dropdown populated successfully");
+                } else {
+                    console.log("No incident types found, using fallback");
+                    console.log("incidentTypes exists:", !!referenceData.incidentTypes);
+                    console.log("incidentTypes length:", referenceData.incidentTypes?.length);
+                    
+                    // Fallback to hardcoded values
+                    incidentTypeSelect.innerHTML = `
+                        <option value="">Select incident type...</option>
+                        <option value="injury">Injury</option>
+                        <option value="near-miss">Near Miss</option>
+                        <option value="environmental">Environmental</option>
+                        <option value="property-damage">Property Damage</option>
+                        <option value="security">Security</option>
+                        <option value="other">Other</option>
+                    `;
+                }
+
+                // Populate locations - handle nested structure
+                console.log("=== Processing locations ===");
+                const locations = referenceData.locations?.ResultSets?.Table1;
+                console.log("Extracted locations array:", !!locations);
+                console.log("Locations array length:", locations?.length || 0);
+                
+                if (locations && locations.length > 0) {
+                    console.log(`Processing ${locations.length} locations...`);
+                    
+                    // Replace text input with dropdown
+                    const locationGroup = locationInput.parentElement;
+                    console.log("Location parent element found:", !!locationGroup);
+                    
+                    const newSelect = document.createElement('select');
+                    newSelect.id = 'location';
+                    newSelect.innerHTML = '<option value="">Select location...</option>';
+                    
+                    locations.forEach((location, index) => {
+                        if (index < 5) { // Log first 5 for debugging
+                            console.log(`Adding location ${index + 1}:`, {
+                                code: location.Humacyte_Location,
+                                description: location.Humacyte_Location_Description,
+                                details: location.Humacyte_Location_Details
+                            });
+                        }
+                        const option = document.createElement('option');
+                        option.value = location.Humacyte_Location;
+                        option.textContent = `${location.Humacyte_Location} - ${location.Humacyte_Location_Description}`;
+                        option.title = location.Humacyte_Location_Details;
+                        newSelect.appendChild(option);
+                    });
+                    
+                    console.log("Replacing location input with dropdown...");
+                    locationGroup.replaceChild(newSelect, locationInput);
+                    console.log(`Locations dropdown created with ${locations.length} options`);
+                } else {
+                    console.log("No locations found, keeping text input");
+                    console.log("Debug info:");
+                    console.log("- referenceData.locations:", !!referenceData.locations);
+                    console.log("- referenceData.locations keys:", referenceData.locations ? Object.keys(referenceData.locations) : 'N/A');
+                    if (referenceData.locations?.ResultSets) {
+                        console.log("- ResultSets keys:", Object.keys(referenceData.locations.ResultSets));
+                    }
+                }
+            } else {
+                console.log("No reference data received, using fallback values");
+                // Fallback to hardcoded incident types if API fails
+                incidentTypeSelect.innerHTML = `
+                    <option value="">Select incident type...</option>
+                    <option value="injury">Injury</option>
+                    <option value="near-miss">Near Miss</option>
+                    <option value="environmental">Environmental</option>
+                    <option value="property-damage">Property Damage</option>
+                    <option value="security">Security</option>
+                    <option value="other">Other</option>
+                `;
+            }
+            console.log("=== loadDropdownData complete ===");
         }
 
         // Sign-in functionality
         document.getElementById("signinButton").addEventListener("click", async () => {
             try {
                 await msalInstance.loginPopup({
-                    scopes: [apiScope]
+                    scopes: [apiScope, dataverseScope, fabricScope]
                 });
                 showMainForm();
             } catch (error) {
@@ -238,9 +416,13 @@
             }
         });
 
-        function showMainForm() {
+        async function showMainForm() {
+            console.log("=== showMainForm called ===");
+            alert("About to call loadDropdownData!"); // DEBUG TEST
             document.getElementById("signinSection").classList.add("hidden");
             document.getElementById("mainForm").classList.remove("hidden");
+            // Load dropdown data after showing the form
+            await loadDropdownData();
         }
 
         function showResult(message, type) {
