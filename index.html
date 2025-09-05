@@ -873,26 +873,35 @@
                 
                 // Collect form data
                 const incidentType = document.getElementById("incidentType").value;
+                const incidentTypeLower = incidentType.toLowerCase();
                 
                 const formData = {
                     incidentTypeId: incidentType,
-                    title: document.getElementById("title").value,
+                    title: document.getElementById("description").value?.substring(0, 100) || "Incident Report", // Use description as title, truncated
                     occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
                     location: document.getElementById("location").value,
                     description: document.getElementById("description").value,
                     reportedByEmail: getCurrentAccount().username,
+                    workOrder: document.getElementById("workOrder").value,
                     customFields: {
-                        injury: incidentType === "injury",
+                        injury: incidentTypeLower.includes("injury"),
+                        illness: incidentTypeLower.includes("illness"),
                         rootCause: ""
                     }
                 };
 
                 // Set rootCause based on incident type and collected dynamic fields
-                if (incidentType === "injury") {
-                    const injurySeverity = document.getElementById("injurySeverity")?.value || "";
-                    const bodyPart = document.getElementById("bodyPart")?.value || "";
-                    const medicalAttention = document.getElementById("medicalAttention")?.value || "";
-                    formData.customFields.rootCause = `Injury: ${injurySeverity} affecting ${bodyPart}, medical attention: ${medicalAttention}`;
+                if (incidentTypeLower.includes("illness") || incidentTypeLower.includes("injury")) {
+                    const beforeEvent = document.getElementById("beforeEvent")?.value || "";
+                    const shiftBegin = document.getElementById("shiftBegin")?.value || "";
+                    const witnesses = document.getElementById("witnesses")?.value || "";
+                    const witnessNames = document.getElementById("witnessNames")?.value || "";
+                    
+                    formData.customFields.beforeEvent = beforeEvent;
+                    formData.customFields.shiftBegin = shiftBegin;
+                    formData.customFields.witnesses = witnesses;
+                    formData.customFields.witnessNames = witnessNames;
+                    formData.customFields.rootCause = `${incidentTypeLower.includes("injury") ? "Injury" : "Illness"}: Before event - ${beforeEvent}, Shift began: ${shiftBegin}, Witnesses: ${witnesses}${witnesses === "yes" ? " (" + witnessNames + ")" : ""}`;
                 } else if (incidentType === "environmental") {
                     const spillType = document.getElementById("spillType")?.value || "";
                     const spillVolume = document.getElementById("spillVolume")?.value || "";
