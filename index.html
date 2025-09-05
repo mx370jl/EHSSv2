@@ -1,350 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Incident Reporting</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
-    .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h1 { color: #333; margin-bottom: 30px; }
-    .form-group { margin-bottom: 20px; }
-    label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-    textarea { height: 100px; resize: vertical; }
-    button { background-color: #0078d4; color: white; padding: 12px 30px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-right: 10px; }
-    button:hover { background-color: #106ebe; }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
-    .signin-section { text-align: center; padding: 50px 0; }
-    .signin-section h2 { color: #666; margin-bottom: 20px; }
-    .hidden { display: none; }
-    .dynamic-fields { background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #0078d4; }
-    .dynamic-fields h3 { margin-top: 0; color: #333; }
-    .result { margin-top: 20px; padding: 15px; border-radius: 4px; font-weight: 600; }
-    .result.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .result.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .loading { color: #0078d4; }
-    pre.debug { background:#111; color:#eee; padding:10px; border-radius:6px; overflow:auto; max-height:200px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Reporting</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #0078d4;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #106ebe;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .signin-section {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .signin-section h2 {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .dynamic-fields {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+            border-left: 4px solid #0078d4;
+        }
+        
+        .dynamic-fields h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .result.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            color: #0078d4;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Sign-in Section -->
-    <div id="signinSection" class="signin-section">
-      <h1>Incident Reporting System</h1>
-      <h2>Please sign in with your company credentials</h2>
-      <button id="signinButton">Sign In</button>
+    <div class="container">
+        <!-- Sign-in Section -->
+        <div id="signinSection" class="signin-section">
+            <h1>Incident Reporting System</h1>
+            <h2>Please sign in with your company credentials</h2>
+            <button id="signinButton">Sign In</button>
+        </div>
+
+        <!-- Main Form -->
+        <div id="mainForm" class="hidden">
+            <h1>Report an Incident</h1>
+            <form id="incidentForm">
+                <div class="form-group">
+                    <label for="incidentType">Incident Type *</label>
+                    <select id="incidentType" required>
+                        <option value="">Select incident type...</option>
+                        <option value="injury">Injury</option>
+                        <option value="near-miss">Near Miss</option>
+                        <option value="environmental">Environmental</option>
+                        <option value="property-damage">Property Damage</option>
+                        <option value="security">Security</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Incident Title *</label>
+                    <input type="text" id="title" required placeholder="Brief description of the incident">
+                </div>
+
+                <div class="form-group">
+                    <label for="occurredAt">Date and Time Occurred *</label>
+                    <input type="datetime-local" id="occurredAt" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="Building, area, or specific location">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Detailed description of what happened"></textarea>
+                </div>
+
+                <!-- Dynamic Fields Section -->
+                <div id="dynamicFields"></div>
+
+                <button type="submit">Submit Incident Report</button>
+                <div id="result"></div>
+            </form>
+        </div>
     </div>
 
-    <!-- Main Form -->
-    <div id="mainForm" class="hidden">
-      <h1>Report an Incident</h1>
-      <form id="incidentForm">
-        <div class="form-group">
-          <label for="incidentType">Incident Type *</label>
-          <select id="incidentType" required>
-            <option value="">Select incident type...</option>
-            <option value="injury">Injury</option>
-            <option value="near-miss">Near Miss</option>
-            <option value="environmental">Environmental</option>
-            <option value="property-damage">Property Damage</option>
-            <option value="security">Security</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="title">Incident Title *</label>
-          <input type="text" id="title" required placeholder="Brief description of the incident">
-        </div>
-
-        <div class="form-group">
-          <label for="occurredAt">Date and Time Occurred *</label>
-          <input type="datetime-local" id="occurredAt" required>
-        </div>
-
-        <div class="form-group">
-          <label for="location">Location</label>
-          <input type="text" id="location" placeholder="Building, area, or specific location">
-        </div>
-
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" placeholder="Detailed description of what happened"></textarea>
-        </div>
-
-        <!-- Dynamic Fields Section -->
-        <div id="dynamicFields"></div>
-
-        <button type="submit">Submit Incident Report</button>
-        <div id="result"></div>
-        <pre id="debugBox" class="debug hidden"></pre>
-      </form>
-    </div>
-  </div>
-
-  <!-- MSAL Library -->
-  <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
-
-  <script>
-    // ===== CONFIG (your values kept) =====
-    const msalConfig = {
-      auth: {
-        clientId: "7f02037e-2cdc-4a25-b069-b846beb3ea84", // SPA app client ID
-        authority: "https://login.microsoftonline.com/7002c3bb-3e4e-4ab7-8b11-65cd3513ecbe",
-        redirectUri: window.location.origin + "/"
-      },
-      cache: { cacheLocation: "sessionStorage" }
-    };
-
-    const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
-    // IMPORTANT: scope must come from your API app registration's "Expose an API"
-    const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
-
-    const DEBUG = true;
-
-    // ===== MSAL =====
-    const msalInstance = new msal.PublicClientApplication(msalConfig);
-    const getCurrentAccount = () => msalInstance.getAllAccounts()[0];
-
-    function parseJwt(token) {
-      try {
-        const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-        return JSON.parse(decodeURIComponent(escape(atob(b64))));
-      } catch { return {}; }
-    }
-
-    function showDebug(obj) {
-      if (!DEBUG) return;
-      const el = document.getElementById("debugBox");
-      el.classList.remove("hidden");
-      el.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
-    }
-
-    async function acquireToken() {
-      const account = getCurrentAccount();
-      if (!account) throw new Error("No signed-in account");
-      try {
-        const result = await msalInstance.acquireTokenSilent({ account, scopes: [apiScope] });
-        const claims = parseJwt(result.accessToken);
-        if (DEBUG) {
-          console.group("Access Token (claims)");
-          console.log("aud:", claims.aud);
-          console.log("scp:", claims.scp);
-          console.log("roles:", claims.roles);
-          console.log("iss:", claims.iss);
-          console.log("tid:", claims.tid);
-          console.log("exp:", claims.exp ? new Date(claims.exp*1000).toISOString() : null);
-          console.groupEnd();
-          showDebug({ tokenClaims: { aud: claims.aud, scp: claims.scp, roles: claims.roles, tid: claims.tid }});
-        }
-        return result.accessToken;
-      } catch (e) {
-        console.warn("Silent token failed, using popup:", e);
-        const result = await msalInstance.acquireTokenPopup({ scopes: [apiScope] });
-        const claims = parseJwt(result.accessToken);
-        if (DEBUG) {
-          console.group("Access Token (claims - popup)");
-          console.log("aud:", claims.aud);
-          console.log("scp:", claims.scp);
-          console.log("roles:", claims.roles);
-          console.log("iss:", claims.iss);
-          console.log("tid:", claims.tid);
-          console.log("exp:", claims.exp ? new Date(claims.exp*1000).toISOString() : null);
-          console.groupEnd();
-          showDebug({ tokenClaims: { aud: claims.aud, scp: claims.scp, roles: claims.roles, tid: claims.tid }});
-        }
-        return result.accessToken;
-      }
-    }
-
-    // ===== UI helpers =====
-    function showMainForm() {
-      document.getElementById("signinSection").classList.add("hidden");
-      document.getElementById("mainForm").classList.remove("hidden");
-    }
-    function showResult(message, type) {
-      const resultDiv = document.getElementById("result");
-      resultDiv.textContent = message;
-      resultDiv.className = "result " + type;
-    }
-
-    // ===== Sign-in =====
-    document.getElementById("signinButton").addEventListener("click", async () => {
-      try {
-        await msalInstance.loginPopup({ scopes: [apiScope] });
-        showMainForm();
-      } catch (error) {
-        console.error("Login failed:", error);
-        showResult("Login failed: " + error.message, "error");
-      }
-    });
-
-    // ===== Dynamic fields =====
-    document.getElementById("incidentType").addEventListener("change", function() {
-      const incidentType = this.value;
-      const dynamicFieldsDiv = document.getElementById("dynamicFields");
-      dynamicFieldsDiv.innerHTML = "";
-
-      if (incidentType === "injury") {
-        dynamicFieldsDiv.innerHTML = `
-          <div class="dynamic-fields">
-            <h3>Injury Details</h3>
-            <div class="form-group">
-              <label for="injurySeverity">Injury Severity</label>
-              <select id="injurySeverity">
-                <option value="first-aid">First Aid</option>
-                <option value="medical-treatment">Medical Treatment</option>
-                <option value="recordable">Recordable</option>
-                <option value="lost-time">Lost Time</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="bodyPart">Body Part Affected</label>
-              <input type="text" id="bodyPart" placeholder="e.g., hand, back, leg">
-            </div>
-            <div class="form-group">
-              <label for="medicalAttention">Medical Attention Required?</label>
-              <select id="medicalAttention">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-          </div>`;
-      } else if (incidentType === "environmental") {
-        dynamicFieldsDiv.innerHTML = `
-          <div class="dynamic-fields">
-            <h3>Environmental Details</h3>
-            <div class="form-group">
-              <label for="spillType">Type of Spill/Release</label>
-              <select id="spillType">
-                <option value="chemical">Chemical</option>
-                <option value="oil">Oil</option>
-                <option value="water">Water</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="spillVolume">Estimated Volume</label>
-              <input type="text" id="spillVolume" placeholder="e.g., 5 gallons, 2 liters">
-            </div>
-            <div class="form-group">
-              <label for="containment">Was spill contained?</label>
-              <select id="containment">
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-                <option value="partial">Partially</option>
-              </select>
-            </div>
-          </div>`;
-      } else if (incidentType === "near-miss") {
-        dynamicFieldsDiv.innerHTML = `
-          <div class="dynamic-fields">
-            <h3>Near Miss Details</h3>
-            <div class="form-group">
-              <label for="potentialConsequence">Potential Consequence</label>
-              <select id="potentialConsequence">
-                <option value="minor-injury">Minor Injury</option>
-                <option value="major-injury">Major Injury</option>
-                <option value="property-damage">Property Damage</option>
-                <option value="environmental">Environmental Impact</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="preventedBy">What prevented the incident?</label>
-              <textarea id="preventedBy" placeholder="Describe what stopped this from becoming an actual incident"></textarea>
-            </div>
-          </div>`;
-      }
-    });
-
-    // ===== Submit =====
-    document.getElementById("incidentForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const submitButton = e.target.querySelector('button[type="submit"]');
-      submitButton.disabled = true;
-      submitButton.textContent = "Submitting...";
-      showResult("Submitting incident report...", "loading");
-
-      try {
-        // 1) Acquire token and show claims so you can match APIM audiences/scopes
-        const token = await acquireToken();
-        const claims = parseJwt(token);
-
-        // 2) Build payload
-        const incidentType = document.getElementById("incidentType").value;
-        const formData = {
-          incidentTypeId: incidentType,
-          title: document.getElementById("title").value,
-          occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
-          location: document.getElementById("location").value,
-          description: document.getElementById("description").value,
-          reportedByEmail: getCurrentAccount().username,
-          customFields: { injury: incidentType === "injury", rootCause: "" }
+    <!-- MSAL Library -->
+    <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+    
+    <script>
+        // Configuration - UPDATE THESE VALUES
+        const msalConfig = {
+            auth: {
+                clientId: "7f02037e-2cdc-4a25-b069-b846beb3ea84",
+                authority: "https://login.microsoftonline.com/7002c3bb-3e4e-4ab7-8b11-65cd3513ecbe",
+                redirectUri: window.location.origin + "/"
+            },
+            cache: {
+                cacheLocation: "sessionStorage"
+            }
         };
 
-        if (incidentType === "injury") {
-          const injurySeverity = document.getElementById("injurySeverity")?.value || "";
-          const bodyPart = document.getElementById("bodyPart")?.value || "";
-          const medicalAttention = document.getElementById("medicalAttention")?.value || "";
-          formData.customFields.rootCause = `Injury: ${injurySeverity} affecting ${bodyPart}, medical attention: ${medicalAttention}`;
-        } else if (incidentType === "environmental") {
-          const spillType = document.getElementById("spillType")?.value || "";
-          const spillVolume = document.getElementById("spillVolume")?.value || "";
-          const containment = document.getElementById("containment")?.value || "";
-          formData.customFields.rootCause = `Environmental: ${spillType} spill of ${spillVolume}, containment: ${containment}`;
-        } else if (incidentType === "near-miss") {
-          const potentialConsequence = document.getElementById("potentialConsequence")?.value || "";
-          const preventedBy = document.getElementById("preventedBy")?.value || "";
-          formData.customFields.rootCause = `Near Miss: potential ${potentialConsequence}, prevented by: ${preventedBy}`;
-        } else {
-          formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
+        // IMPORTANT: UPDATE THIS URL with your actual APIM URL
+        const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
+        const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
+
+        // Initialize MSAL
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+        // Helper functions
+        function getCurrentAccount() {
+            return msalInstance.getAllAccounts()[0];
         }
 
-        console.log("Submitting form data:", JSON.stringify(formData, null, 2));
+        async function acquireToken() {
+            const account = getCurrentAccount();
+            if (!account) {
+                throw new Error("No account found");
+            }
 
-        // 3) Call APIM WITH AUTHORIZATION HEADER (this fixes the 401)
-        const response = await fetch(`${apiBaseUrl}/submit`, {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + token,        // <<< ADDED
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
+            try {
+                const result = await msalInstance.acquireTokenSilent({
+                    account: account,
+                    scopes: [apiScope]
+                });
+                return result.accessToken;
+            } catch (error) {
+                console.log("Silent token acquisition failed, acquiring token using popup");
+                const result = await msalInstance.acquireTokenPopup({
+                    scopes: [apiScope]
+                });
+                return result.accessToken;
+            }
+        }
+
+        // Sign-in functionality
+        document.getElementById("signinButton").addEventListener("click", async () => {
+            try {
+                await msalInstance.loginPopup({
+                    scopes: [apiScope]
+                });
+                showMainForm();
+            } catch (error) {
+                console.error("Login failed:", error);
+                showResult("Login failed: " + error.message, "error");
+            }
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          showResult("Incident report submitted successfully! Reference ID: " + (result.incidentId || "Generated"), "success");
-          document.getElementById("incidentForm").reset();
-          document.getElementById("dynamicFields").innerHTML = "";
-        } else {
-          const errorText = await response.text();
-          console.error("Full error response:", errorText);
-          console.error("Response headers:", [...response.headers.entries()]);
-          console.error("Response status:", response.status);
-          console.error("Response statusText:", response.statusText);
-          console.error("Form data sent:", JSON.stringify(formData, null, 2));
-          showResult("Submission failed: " + response.status + " - " + errorText, "error");
-          showDebug({ apiError: { status: response.status, statusText: response.statusText, text: errorText }, tokenAud: claims.aud, tokenScp: claims.scp });
+        function showMainForm() {
+            document.getElementById("signinSection").classList.add("hidden");
+            document.getElementById("mainForm").classList.remove("hidden");
         }
 
-      } catch (error) {
-        console.error("Error submitting form:", error);
-        showResult("Error submitting form: " + error.message, "error");
-        showDebug({ error: error.message });
-      } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = "Submit Incident Report";
-      }
-    });
+        function showResult(message, type) {
+            const resultDiv = document.getElementById("result");
+            resultDiv.textContent = message;
+            resultDiv.className = "result " + type;
+        }
 
-    // ===== Auto show if already signed in =====
-    window.addEventListener("load", () => {
-      const account = getCurrentAccount();
-      if (account) showMainForm();
-    });
-  </script>
+        // Dynamic form fields based on incident type
+        document.getElementById("incidentType").addEventListener("change", function() {
+            const incidentType = this.value;
+            const dynamicFieldsDiv = document.getElementById("dynamicFields");
+            
+            dynamicFieldsDiv.innerHTML = "";
+
+            if (incidentType === "injury") {
+                dynamicFieldsDiv.innerHTML = `
+                    <div class="dynamic-fields">
+                        <h3>Injury Details</h3>
+                        <div class="form-group">
+                            <label for="injurySeverity">Injury Severity</label>
+                            <select id="injurySeverity">
+                                <option value="first-aid">First Aid</option>
+                                <option value="medical-treatment">Medical Treatment</option>
+                                <option value="recordable">Recordable</option>
+                                <option value="lost-time">Lost Time</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bodyPart">Body Part Affected</label>
+                            <input type="text" id="bodyPart" placeholder="e.g., hand, back, leg">
+                        </div>
+                        <div class="form-group">
+                            <label for="medicalAttention">Medical Attention Required?</label>
+                            <select id="medicalAttention">
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (incidentType === "environmental") {
+                dynamicFieldsDiv.innerHTML = `
+                    <div class="dynamic-fields">
+                        <h3>Environmental Details</h3>
+                        <div class="form-group">
+                            <label for="spillType">Type of Spill/Release</label>
+                            <select id="spillType">
+                                <option value="chemical">Chemical</option>
+                                <option value="oil">Oil</option>
+                                <option value="water">Water</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="spillVolume">Estimated Volume</label>
+                            <input type="text" id="spillVolume" placeholder="e.g., 5 gallons, 2 liters">
+                        </div>
+                        <div class="form-group">
+                            <label for="containment">Was spill contained?</label>
+                            <select id="containment">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                                <option value="partial">Partially</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (incidentType === "near-miss") {
+                dynamicFieldsDiv.innerHTML = `
+                    <div class="dynamic-fields">
+                        <h3>Near Miss Details</h3>
+                        <div class="form-group">
+                            <label for="potentialConsequence">Potential Consequence</label>
+                            <select id="potentialConsequence">
+                                <option value="minor-injury">Minor Injury</option>
+                                <option value="major-injury">Major Injury</option>
+                                <option value="property-damage">Property Damage</option>
+                                <option value="environmental">Environmental Impact</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preventedBy">What prevented the incident?</label>
+                            <textarea id="preventedBy" placeholder="Describe what stopped this from becoming an actual incident"></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        // Form submission
+        document.getElementById("incidentForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
+            showResult("Submitting incident report...", "loading");
+
+            try {
+                const token = await acquireToken();
+                
+                // Collect form data
+                const incidentType = document.getElementById("incidentType").value;
+                
+                const formData = {
+                    incidentTypeId: incidentType,
+                    title: document.getElementById("title").value,
+                    occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
+                    location: document.getElementById("location").value,
+                    description: document.getElementById("description").value,
+                    reportedByEmail: getCurrentAccount().username,
+                    customFields: {
+                        injury: incidentType === "injury",
+                        rootCause: ""
+                    }
+                };
+
+                // Set rootCause based on incident type and collected dynamic fields
+                if (incidentType === "injury") {
+                    const injurySeverity = document.getElementById("injurySeverity")?.value || "";
+                    const bodyPart = document.getElementById("bodyPart")?.value || "";
+                    const medicalAttention = document.getElementById("medicalAttention")?.value || "";
+                    formData.customFields.rootCause = `Injury: ${injurySeverity} affecting ${bodyPart}, medical attention: ${medicalAttention}`;
+                } else if (incidentType === "environmental") {
+                    const spillType = document.getElementById("spillType")?.value || "";
+                    const spillVolume = document.getElementById("spillVolume")?.value || "";
+                    const containment = document.getElementById("containment")?.value || "";
+                    formData.customFields.rootCause = `Environmental: ${spillType} spill of ${spillVolume}, containment: ${containment}`;
+                } else if (incidentType === "near-miss") {
+                    const potentialConsequence = document.getElementById("potentialConsequence")?.value || "";
+                    const preventedBy = document.getElementById("preventedBy")?.value || "";
+                    formData.customFields.rootCause = `Near Miss: potential ${potentialConsequence}, prevented by: ${preventedBy}`;
+                } else {
+                    formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
+                }
+
+                console.log("Submitting form data:", JSON.stringify(formData, null, 2));
+
+                // Submit to API
+                const response = await fetch(`${apiBaseUrl}/submit`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult("Incident report submitted successfully! Reference ID: " + (result.incidentId || "Generated"), "success");
+                    document.getElementById("incidentForm").reset();
+                    document.getElementById("dynamicFields").innerHTML = "";
+                } else {
+                    const errorText = await response.text();
+                    console.error("Full error response:", errorText);
+                    console.error("Response headers:", [...response.headers.entries()]);
+                    console.error("Response status:", response.status);
+                    console.error("Response statusText:", response.statusText);
+                    console.error("Form data sent:", JSON.stringify(formData, null, 2));
+                    showResult("Submission failed: " + response.status + " - " + errorText, "error");
+                }
+
+            } catch (error) {
+                console.error("Error submitting form:", error);
+                showResult("Error submitting form: " + error.message, "error");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit Incident Report";
+            }
+        });
+
+        // Check if user is already signed in
+        window.addEventListener("load", () => {
+            const account = getCurrentAccount();
+            if (account) {
+                showMainForm();
+            }
+        });
+    </script>
 </body>
 </html>
