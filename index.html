@@ -237,7 +237,7 @@
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
             console.log("API Base URL:", apiBaseUrl);
-            console.log("Full URL:", `${apiBaseUrl}/reference-data`);
+            console.log("Full URL:", `${apiBaseUrl}/referencedata`);
             
             // TEMPORARY: Test direct Logic App URL
             const testURL = "https://prod-76.eastus.logic.azure.com:443/workflows/[YOUR-LOGIC-APP-WORKFLOW-ID]/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=[YOUR-SIG]";
@@ -245,7 +245,7 @@
             
             try {
                 console.log("Making fetch request...");
-                const response = await fetch(`${apiBaseUrl}/reference-data`, {
+                const response = await fetch(`${apiBaseUrl}/referencedata`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
