@@ -380,7 +380,7 @@
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
-                // Submit to API
+                // Submit to API with Authorization header
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
                     headers: {
