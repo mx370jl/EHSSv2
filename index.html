@@ -182,6 +182,9 @@
         const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
         const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
 
+        // Helper to ensure we never accidentally add other resources
+        const apiScopes = [apiScope];
+
         // Data source configurations
         const dataverseScope = "https://masterdatatoolsdev.crm.dynamics.com/user_impersonation";
         const fabricScope = "https://analysis.windows.net/powerbi/api/Dataset.Read.All";
@@ -201,7 +204,11 @@
             if (!account) { throw new Error("No account found"); }
 
             try {
-                const result = await msalInstance.acquireTokenSilent({ account, scopes });
+                // Acquire token for APIM
+                const result = await msalInstance.acquireTokenSilent({
+                  account: msalInstance.getAllAccounts()[0],
+                  scopes: apiScopes                                // ONLY your API scope
+                });
                 return result.accessToken;
             } catch (error) {
                 console.log("Silent token acquisition failed, acquiring token using popup");
@@ -353,7 +360,7 @@
             button.disabled = true;
 
             try {
-                await msalInstance.loginPopup({ scopes: [apiScope, dataverseScope, fabricScope] });
+                await msalInstance.loginPopup({ scopes: apiScopes });
                 showMainForm();
             } catch (error) {
                 console.error("Login failed:", error);
