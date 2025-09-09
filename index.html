@@ -293,8 +293,8 @@
                     incidentTypeSelect.innerHTML = '<option value="">Select event type...</option>';
                     referenceData.incidentTypes.forEach(type => {
                         const option = document.createElement('option');
-                        option.value = type.crb18_humit_incidenttypeid;
-                        option.textContent = type.crb18_eventtypename;
+                        option.value = type.humit_humacyteincidenttypeid;
+                        option.textContent = type.humit_incidenttypename;
                         incidentTypeSelect.appendChild(option);
                     });
                 } else {
