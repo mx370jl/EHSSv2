@@ -459,8 +459,6 @@
             showResult("Submitting incident report...", "loading");
 
             try {
-                const token = await acquireToken();
-                
                 const incidentType = document.getElementById("incidentType").value;
                 const incidentTypeText = (document.getElementById("incidentType").options[document.getElementById("incidentType").selectedIndex]?.text || "");
                 const incidentTypeLower = incidentTypeText.toLowerCase();
