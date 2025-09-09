@@ -123,8 +123,6 @@
                         </select>
                     </div>
 
-                    <!-- Removed "Incident Title" per requirements -->
-
                     <div class="form-group">
                         <label for="occurredAt" class="required">When did the event occur?</label>
                         <input type="datetime-local" id="occurredAt" required disabled>
@@ -150,7 +148,7 @@
                         </select>
                     </div>
 
-                    <!-- Dynamic Fields Section (illness/injury, plus any others you keep) -->
+                    <!-- Dynamic Fields Section -->
                     <div id="dynamicFields"></div>
 
                     <button type="submit" disabled>
@@ -168,7 +166,7 @@
     <script>
         console.log("=== SCRIPT STARTED - PAGE LOADED ===");
 
-        // Configuration - UPDATE THESE VALUES
+        // Configuration
         const msalConfig = {
             auth: {
                 clientId: "7f02037e-2cdc-4a25-b069-b846beb3ea84",
@@ -178,18 +176,12 @@
             cache: { cacheLocation: "sessionStorage" }
         };
 
-        // IMPORTANT: UPDATE THIS URL with your actual APIM URL
+        // API Configuration
         const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
         const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
 
-        // Helper to ensure we never accidentally add other resources
-        const apiScopes = [apiScope];
-
-        // Data source configurations
-        const dataverseScope = "https://masterdatatoolsdev.crm.dynamics.com/user_impersonation";
-        const fabricScope = "https://analysis.windows.net/powerbi/api/Dataset.Read.All";
-        const dataverseUrl = "https://masterdatatoolsdev.crm.dynamics.com/api/data/v9.2";
-        const fabricEndpoint = "xpbqe4coh23uvcyrmxgtke7mxy-2cuq2agisxqehjzz7dgjlakq3i.datawarehouse.fabric.microsoft.com";
+        // FIXED: Only use API scope for initial login
+        const loginScopes = [apiScope, "openid", "profile", "offline_access"];
 
         // Initialize MSAL
         const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -199,20 +191,22 @@
             return msalInstance.getAllAccounts()[0];
         }
 
-        async function acquireToken(scopes = [apiScope]) {
+        async function acquireToken() {
             const account = getCurrentAccount();
             if (!account) { throw new Error("No account found"); }
 
             try {
-                // Acquire token for APIM
+                // FIXED: Only request API scope for token
                 const result = await msalInstance.acquireTokenSilent({
-                  account: msalInstance.getAllAccounts()[0],
-                  scopes: apiScopes                                // ONLY your API scope
+                    account: account,
+                    scopes: [apiScope]  // Only API scope, no others
                 });
                 return result.accessToken;
             } catch (error) {
                 console.log("Silent token acquisition failed, acquiring token using popup");
-                const result = await msalInstance.acquireTokenPopup({ scopes });
+                const result = await msalInstance.acquireTokenPopup({ 
+                    scopes: [apiScope]  // Only API scope
+                });
                 return result.accessToken;
             }
         }
@@ -223,8 +217,6 @@
             document.getElementById("incidentForm").classList.add("form-loading");
         }
 
-        // ONLY enable incident type after loading;
-        // keep the rest disabled until a real selection is made.
         function hideLoading() {
             document.getElementById("loadingOverlay").style.display = "none";
             document.getElementById("incidentForm").classList.remove("form-loading");
@@ -245,12 +237,11 @@
                 if (el) el.disabled = !isEnabled;
             });
 
-            // Also enable/disable any dynamic child inputs when toggling
             const dynamicInputs = document.querySelectorAll("#dynamicFields input, #dynamicFields select, #dynamicFields textarea");
             dynamicInputs.forEach(el => el.disabled = !isEnabled);
         }
 
-        // Data fetching function - calls Logic App via APIM
+        // FIXED: Data fetching function
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
             try {
@@ -277,7 +268,7 @@
             }
         }
 
-        // Populate dropdowns with data
+        // FIXED: Populate dropdowns with correct field names
         async function loadDropdownData() {
             console.log("=== Starting loadDropdownData ===");
             showLoading();
@@ -287,17 +278,21 @@
 
             try {
                 const referenceData = await fetchReferenceData();
+                console.log("Reference data received:", referenceData);
 
-                // INCIDENT TYPES
+                // FIXED: Use correct field names for incident types
                 if (referenceData?.incidentTypes?.length) {
                     incidentTypeSelect.innerHTML = '<option value="">Select event type...</option>';
                     referenceData.incidentTypes.forEach(type => {
                         const option = document.createElement('option');
-                        option.value = type.humit_humacyteincidenttypeid;
-                        option.textContent = type.humit_incidenttypename;
+                        // FIXED: Use correct field names from your JSON response
+                        option.value = type.humit_humacyteincidenttypeid;  // Was: crb18_humit_incidenttypeid
+                        option.textContent = type.humit_incidenttypename;  // Was: crb18_eventtypename
                         incidentTypeSelect.appendChild(option);
+                        console.log("Added incident type:", type.humit_incidenttypename);
                     });
                 } else {
+                    console.log("No incident types found, using fallback");
                     // Fallback
                     incidentTypeSelect.innerHTML = `
                         <option value="">Select event type...</option>
@@ -311,7 +306,7 @@
                     `;
                 }
 
-                // LOCATIONS (replace text input with select if data present)
+                // LOCATIONS
                 const locations = referenceData?.locations?.ResultSets?.Table1;
                 if (locations?.length) {
                     const locationGroup = locationInput.parentElement;
@@ -329,7 +324,6 @@
 
                     locationGroup.replaceChild(newSelect, locationInput);
                 } else {
-                    // keep text input; just set placeholder
                     locationInput.placeholder = "Building, area, or specific location";
                 }
             } catch (error) {
@@ -347,12 +341,12 @@
                 `;
                 if (locationInput) locationInput.placeholder = "Building, area, or specific location";
             } finally {
-                hideLoading(); // Enable ONLY the event type select
+                hideLoading();
             }
             console.log("=== loadDropdownData complete ===");
         }
 
-        // Sign-in functionality
+        // FIXED: Sign-in functionality with correct scopes
         document.getElementById("signinButton").addEventListener("click", async () => {
             const button = document.getElementById("signinButton");
             const originalText = button.textContent;
@@ -360,7 +354,8 @@
             button.disabled = true;
 
             try {
-                await msalInstance.loginPopup({ scopes: apiScopes });
+                // FIXED: Use only login scopes, no multiple resources
+                await msalInstance.loginPopup({ scopes: loginScopes });
                 showMainForm();
             } catch (error) {
                 console.error("Login failed:", error);
@@ -374,7 +369,6 @@
             console.log("=== showMainForm called ===");
             document.getElementById("signinSection").classList.add("hidden");
             document.getElementById("mainForm").classList.remove("hidden");
-            // Load dropdown data after showing the form
             await loadDropdownData();
         }
 
@@ -427,20 +421,15 @@
                 const val = String(select.value || "").trim();
                 const enabled = val !== "";
 
-                // Enable/disable rest of the form
                 setRestEnabled(enabled);
-
-                // Reset dynamic area
                 clearDynamicFields();
 
                 if (!enabled) return;
 
                 const text = (select.options[select.selectedIndex]?.text || "").toLowerCase();
-                // Show Illness/Injury subform if name contains 'illness' or 'injury'
                 if (text.includes("illness") || text.includes("injury")) {
                     document.getElementById("dynamicFields").innerHTML = buildIllnessInjurySubform();
 
-                    // Wire up witness show/hide
                     const witnessesSel = document.getElementById("witnesses");
                     const witnessNamesGroup = document.getElementById("witnessNamesGroup");
                     witnessesSel.addEventListener("change", () => {
@@ -469,31 +458,46 @@
             showResult("Submitting incident report...", "loading");
 
             try {
-                // Acquire token (not forwarded to API per your current design)
-                await acquireToken();
-
-                // Collect form data
                 const incidentType = document.getElementById("incidentType").value;
                 const incidentTypeText = (document.getElementById("incidentType").options[document.getElementById("incidentType").selectedIndex]?.text || "");
                 const incidentTypeLower = incidentTypeText.toLowerCase();
 
-                // Might still be an <input> or replaced by <select>
                 const locationEl = document.getElementById("location");
-                const locationVal = locationEl ? locationEl.value : "";
+                let locationData = {};
+                
+                // Parse location data (could be JSON from dropdown or plain text)
+                if (locationEl) {
+                    const locationValue = locationEl.value;
+                    if (locationValue.startsWith('{')) {
+                        // It's JSON from the dropdown
+                        try {
+                            locationData = JSON.parse(locationValue);
+                        } catch (e) {
+                            console.error("Error parsing location JSON:", e);
+                            locationData = { code: locationValue, description: "", details: "" };
+                        }
+                    } else {
+                        // It's plain text (fallback input)
+                        locationData = { code: locationValue, description: "", details: "" };
+                    }
+                }
 
                 const formData = {
-                    incidentTypeId: incidentType,           // underlying id/value
-                    incidentTypeName: incidentTypeText,     // human-readable text
+                    incidentTypeId: incidentType,
+                    incidentTypeName: incidentTypeText,
                     title: (document.getElementById("description").value || "").substring(0, 100) || "Incident Report",
                     occurredAt: new Date(document.getElementById("occurredAt").value).toISOString(),
-                    location: locationVal,
+                    location: locationData.code || "", // Main location code for backward compatibility
+                    locationCode: locationData.code || "",
+                    locationDescription: locationData.description || "",
+                    locationDetails: locationData.details || "",
                     description: document.getElementById("description").value,
                     reportedByEmail: getCurrentAccount()?.username || "",
                     workOrder: document.getElementById("workOrder").value,
                     customFields: { injury: false, illness: false, rootCause: "" }
                 };
 
-                // Illness/Injury subform handling
+                // Re-enable the illness/injury custom fields handling
                 if (incidentTypeLower.includes("injury") || incidentTypeLower.includes("illness")) {
                     const beforeEvent = document.getElementById("beforeEvent")?.value || "";
                     const shiftBegin = document.getElementById("shiftBegin")?.value || "";
@@ -513,13 +517,11 @@
                         `Shift began: ${shiftBegin || "N/A"}, ` +
                         `Witnesses: ${witnesses || "N/A"}${witnesses === "yes" && witnessNames ? " (" + witnessNames + ")" : ""}`;
                 } else {
-                    // Default root cause fallback to description
                     formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
                 }
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
-                // Submit to API WITHOUT Authorization header (per your current APIM design)
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -531,7 +533,6 @@
                     showResult("Incident report submitted successfully! Reference ID: " + (result.incidentId || "Generated"), "success");
                     document.getElementById("incidentForm").reset();
                     clearDynamicFields();
-                    // After reset, keep only event type enabled
                     enableOnlyIncidentType();
                 } else {
                     const errorText = await response.text();
