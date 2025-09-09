@@ -516,14 +516,18 @@
                 if (incidentTypeLower.includes("injury") || incidentTypeLower.includes("illness")) {
                     const beforeEvent = document.getElementById("beforeEvent")?.value || "";
                     const shiftBegin = document.getElementById("shiftBegin")?.value || "";
-                    const witnesses = document.getElementById("witnesses")?.value || "";
+                    const witnessesRaw = (document.getElementById("witnesses")?.value || "").trim().toLowerCase();
+                    let witnessesBool = null;
+                    if (witnessesRaw === "yes") witnessesBool = true;
+                    else if (witnessesRaw === "no") witnessesBool = false;
+                    
                     const witnessNames = document.getElementById("witnessNames")?.value || "";
 
                     formData.customFields.injury = incidentTypeLower.includes("injury");
                     formData.customFields.illness = incidentTypeLower.includes("illness");
                     formData.customFields.beforeEvent = beforeEvent;
                     formData.customFields.shiftBegin = shiftBegin ? new Date(shiftBegin).toISOString() : "";
-                    formData.customFields.witnesses = witnesses;
+                    formData.customFields.witnesses = witnessesBool;   // boolean or null
                     formData.customFields.witnessNames = witnessNames;
 
                     const label = formData.customFields.injury ? "Injury" : "Illness";
