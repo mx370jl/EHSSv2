@@ -284,7 +284,6 @@
                     incidentTypeSelect.innerHTML = '<option value="">Select event type...</option>';
                     referenceData.incidentTypes.forEach(type => {
                         const option = document.createElement('option');
-                        // Use correct field names from your JSON response
                         option.value = type.humit_humacyteincidenttypeid;
                         option.textContent = type.humit_incidenttypename;
                         incidentTypeSelect.appendChild(option);
@@ -314,7 +313,6 @@
 
                     locations.forEach(loc => {
                         const opt = document.createElement('option');
-                        // Use simple value and store additional data in data attributes
                         opt.value = loc.Humacyte_Location;
                         opt.setAttribute('data-description', loc.Humacyte_Location_Description);
                         opt.setAttribute('data-details', loc.Humacyte_Location_Details);
@@ -459,9 +457,10 @@
             showResult("Submitting incident report...", "loading");
 
             try {
-                const incidentType = document.getElementById("incidentType").value;
-                const incidentTypeText = (document.getElementById("incidentType").options[document.getElementById("incidentType").selectedIndex]?.text || "");
-                const incidentTypeLower = incidentTypeText.toLowerCase();
+                const incidentTypeSel = document.getElementById("incidentType");
+                const incidentType = incidentTypeSel?.value ?? "";
+                const incidentTypeText = (incidentTypeSel?.options[incidentTypeSel?.selectedIndex]?.text || "");
+                const incidentTypeLower = (incidentTypeText || "").toLowerCase();
 
                 // Parse location data using data attributes (more reliable than JSON)
                 const locationEl = document.getElementById("location");
@@ -488,6 +487,15 @@
                     locationData = { code: "", description: "", details: "" };
                 }
 
+                // ---- ROBUST WORK ORDER BOOLEAN MAPPING (fix) ----
+                const workOrderEl = document.getElementById("workOrder");
+                const workOrderDisplay = workOrderEl?.value ?? "";
+                const workOrderRaw = workOrderDisplay.trim().toLowerCase();
+                const workOrderBoolean =
+                    workOrderRaw === "yes" ? true :
+                    workOrderRaw === "no"  ? false : null;
+
+                // Build payload
                 const formData = {
                     incidentTypeId: incidentType,
                     incidentTypeName: incidentTypeText,
@@ -499,9 +507,8 @@
                     locationDetails: locationData.details || "",
                     description: document.getElementById("description").value,
                     reportedByEmail: getCurrentAccount()?.username || "",
-                    workOrder: document.getElementById("workOrder").value,
-                    workOrderBoolean: document.getElementById("workOrder").value === "Yes" ? true : 
-                                    document.getElementById("workOrder").value === "No" ? false : null,
+                    workOrder: workOrderDisplay,
+                    workOrderBoolean: workOrderBoolean,   // <-- guaranteed true/false/null (never undefined)
                     customFields: { injury: false, illness: false, rootCause: "" }
                 };
 
@@ -528,12 +535,16 @@
                     formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
                 }
 
+                // Helpful debug
+                console.log("workOrder raw/value/boolean:", workOrderDisplay, `"${workOrderRaw}"`, workOrderBoolean);
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
                     headers: { 
                         "Content-Type": "application/json"
+                        // If your API requires auth, uncomment the next two lines:
+                        // , "Authorization": `Bearer ${await acquireToken()}`
                     },
                     body: JSON.stringify(formData)
                 });
