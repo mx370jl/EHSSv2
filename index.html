@@ -494,6 +494,8 @@
                     description: document.getElementById("description").value,
                     reportedByEmail: getCurrentAccount()?.username || "",
                     workOrder: document.getElementById("workOrder").value,
+                    workOrderBoolean: document.getElementById("workOrder").value === "Yes" ? true : 
+                                    document.getElementById("workOrder").value === "No" ? false : null,
                     customFields: { injury: false, illness: false, rootCause: "" }
                 };
 
