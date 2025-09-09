@@ -180,7 +180,7 @@
         const apiBaseUrl = "https://apimhumacyte.azure-api.net/incident";
         const apiScope = "api://7f02037e-2cdc-4a25-b069-b846beb3ea84/Incidents.Submit";
 
-        // FIXED: Only use API scope for initial login
+        // Only use API scope for login
         const loginScopes = [apiScope, "openid", "profile", "offline_access"];
 
         // Initialize MSAL
@@ -196,16 +196,15 @@
             if (!account) { throw new Error("No account found"); }
 
             try {
-                // FIXED: Only request API scope for token
                 const result = await msalInstance.acquireTokenSilent({
                     account: account,
-                    scopes: [apiScope]  // Only API scope, no others
+                    scopes: [apiScope]  // Only API scope
                 });
                 return result.accessToken;
             } catch (error) {
                 console.log("Silent token acquisition failed, acquiring token using popup");
                 const result = await msalInstance.acquireTokenPopup({ 
-                    scopes: [apiScope]  // Only API scope
+                    scopes: [apiScope]
                 });
                 return result.accessToken;
             }
@@ -241,7 +240,7 @@
             dynamicInputs.forEach(el => el.disabled = !isEnabled);
         }
 
-        // FIXED: Data fetching function
+        // Data fetching function
         async function fetchReferenceData() {
             console.log("=== Starting fetchReferenceData ===");
             try {
@@ -268,7 +267,7 @@
             }
         }
 
-        // FIXED: Populate dropdowns with correct field names
+        // Populate dropdowns with correct field names and data attributes for locations
         async function loadDropdownData() {
             console.log("=== Starting loadDropdownData ===");
             showLoading();
@@ -280,20 +279,19 @@
                 const referenceData = await fetchReferenceData();
                 console.log("Reference data received:", referenceData);
 
-                // FIXED: Use correct field names for incident types
+                // INCIDENT TYPES - Use correct field names from API response
                 if (referenceData?.incidentTypes?.length) {
                     incidentTypeSelect.innerHTML = '<option value="">Select event type...</option>';
                     referenceData.incidentTypes.forEach(type => {
                         const option = document.createElement('option');
-                        // FIXED: Use correct field names from your JSON response
-                        option.value = type.humit_humacyteincidenttypeid;  // Was: crb18_humit_incidenttypeid
-                        option.textContent = type.humit_incidenttypename;  // Was: crb18_eventtypename
+                        // Use correct field names from your JSON response
+                        option.value = type.humit_humacyteincidenttypeid;
+                        option.textContent = type.humit_incidenttypename;
                         incidentTypeSelect.appendChild(option);
                         console.log("Added incident type:", type.humit_incidenttypename);
                     });
                 } else {
                     console.log("No incident types found, using fallback");
-                    // Fallback
                     incidentTypeSelect.innerHTML = `
                         <option value="">Select event type...</option>
                         <option value="injury">Injury</option>
@@ -306,7 +304,7 @@
                     `;
                 }
 
-                // LOCATIONS
+                // LOCATIONS - Use data attributes instead of JSON
                 const locations = referenceData?.locations?.ResultSets?.Table1;
                 if (locations?.length) {
                     const locationGroup = locationInput.parentElement;
@@ -316,13 +314,17 @@
 
                     locations.forEach(loc => {
                         const opt = document.createElement('option');
+                        // Use simple value and store additional data in data attributes
                         opt.value = loc.Humacyte_Location;
+                        opt.setAttribute('data-description', loc.Humacyte_Location_Description);
+                        opt.setAttribute('data-details', loc.Humacyte_Location_Details);
                         opt.textContent = `${loc.Humacyte_Location} - ${loc.Humacyte_Location_Description}`;
                         opt.title = loc.Humacyte_Location_Details;
                         newSelect.appendChild(opt);
                     });
 
                     locationGroup.replaceChild(newSelect, locationInput);
+                    console.log("Replaced location input with select containing", locations.length, "locations");
                 } else {
                     locationInput.placeholder = "Building, area, or specific location";
                 }
@@ -346,7 +348,7 @@
             console.log("=== loadDropdownData complete ===");
         }
 
-        // FIXED: Sign-in functionality with correct scopes
+        // Sign-in functionality
         document.getElementById("signinButton").addEventListener("click", async () => {
             const button = document.getElementById("signinButton");
             const originalText = button.textContent;
@@ -354,7 +356,6 @@
             button.disabled = true;
 
             try {
-                // FIXED: Use only login scopes, no multiple resources
                 await msalInstance.loginPopup({ scopes: loginScopes });
                 showMainForm();
             } catch (error) {
@@ -458,28 +459,35 @@
             showResult("Submitting incident report...", "loading");
 
             try {
+                const token = await acquireToken();
+                
                 const incidentType = document.getElementById("incidentType").value;
                 const incidentTypeText = (document.getElementById("incidentType").options[document.getElementById("incidentType").selectedIndex]?.text || "");
                 const incidentTypeLower = incidentTypeText.toLowerCase();
 
+                // Parse location data using data attributes (more reliable than JSON)
                 const locationEl = document.getElementById("location");
                 let locationData = {};
                 
-                // Parse location data (could be JSON from dropdown or plain text)
-                if (locationEl) {
-                    const locationValue = locationEl.value;
-                    if (locationValue.startsWith('{')) {
-                        // It's JSON from the dropdown
-                        try {
-                            locationData = JSON.parse(locationValue);
-                        } catch (e) {
-                            console.error("Error parsing location JSON:", e);
-                            locationData = { code: locationValue, description: "", details: "" };
-                        }
+                if (locationEl && locationEl.value) {
+                    if (locationEl.tagName === 'SELECT' && locationEl.selectedIndex > 0) {
+                        const selectedOption = locationEl.options[locationEl.selectedIndex];
+                        locationData = {
+                            code: selectedOption.value,
+                            description: selectedOption.getAttribute('data-description') || '',
+                            details: selectedOption.getAttribute('data-details') || ''
+                        };
+                        console.log("Location data from attributes:", locationData);
                     } else {
-                        // It's plain text (fallback input)
-                        locationData = { code: locationValue, description: "", details: "" };
+                        // Fallback for text input
+                        locationData = { 
+                            code: locationEl.value, 
+                            description: "", 
+                            details: "" 
+                        };
                     }
+                } else {
+                    locationData = { code: "", description: "", details: "" };
                 }
 
                 const formData = {
@@ -499,7 +507,7 @@
                     customFields: { injury: false, illness: false, rootCause: "" }
                 };
 
-                // Re-enable the illness/injury custom fields handling
+                // Illness/Injury subform handling
                 if (incidentTypeLower.includes("injury") || incidentTypeLower.includes("illness")) {
                     const beforeEvent = document.getElementById("beforeEvent")?.value || "";
                     const shiftBegin = document.getElementById("shiftBegin")?.value || "";
@@ -526,7 +534,10 @@
 
                 const response = await fetch(`${apiBaseUrl}/submit`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(formData)
                 });
 
