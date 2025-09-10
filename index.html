@@ -530,24 +530,35 @@
                 if (incidentTypeLower.includes("injury") || incidentTypeLower.includes("illness")) {
                     const beforeEvent = document.getElementById("beforeEvent")?.value || "";
                     const shiftBegin = document.getElementById("shiftBegin")?.value || "";
-                    const witnesses = document.getElementById("witnesses")?.value || "";
-                    const witnessNames = document.getElementById("witnessNames")?.value || "";
-
+                
+                    // CHANGED: keep raw select value for text, but also derive a boolean for payload
+                    const witnessesRaw = document.getElementById("witnesses")?.value || "";
+                    const witnessesBool = witnessesRaw === "yes" ? true : (witnessesRaw === "no" ? false : null);
+                
+                    const witnessNames = document.getElementById("witnesses")?.value === "yes"
+                        ? (document.getElementById("witnessNames")?.value || "")
+                        : "";
+                
                     formData.customFields.injury = incidentTypeLower.includes("injury");
                     formData.customFields.illness = incidentTypeLower.includes("illness");
                     formData.customFields.beforeEvent = beforeEvent;
                     formData.customFields.shiftBegin = shiftBegin ? new Date(shiftBegin).toISOString() : "";
-                    formData.customFields.witnesses = witnesses;
+                
+                    // CHANGED: send boolean/null in the payload instead of "yes"/"no"
+                    formData.customFields.witnesses = witnessesBool;
+                
                     formData.customFields.witnessNames = witnessNames;
-
+                
                     const label = formData.customFields.injury ? "Injury" : "Illness";
                     formData.customFields.rootCause =
                         `${label}: Before event - ${beforeEvent || "N/A"}, ` +
                         `Shift began: ${shiftBegin || "N/A"}, ` +
-                        `Witnesses: ${witnesses || "N/A"}${witnesses === "yes" && witnessNames ? " (" + witnessNames + ")" : ""}`;
+                        // keep using the raw value for human-readable text
+                        `Witnesses: ${witnessesRaw || "N/A"}${witnessesRaw === "yes" && witnessNames ? " (" + witnessNames + ")" : ""}`;
                 } else {
                     formData.customFields.rootCause = document.getElementById("description").value || "No specific root cause identified";
                 }
+
 
                 console.log("Submitting form data:", JSON.stringify(formData, null, 2));
 
