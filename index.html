@@ -368,6 +368,27 @@
 
         async function showMainForm() {
             console.log("=== showMainForm called ===");
+            
+            // Debug MSAL account object right after sign-in
+            const currentAccount = getCurrentAccount();
+            console.log("=== MSAL ACCOUNT DEBUG (after sign-in) ===");
+            console.log("Full MSAL account object:", currentAccount);
+            
+            if (currentAccount) {
+                console.log("Account properties:", Object.keys(currentAccount));
+                console.log("username:", currentAccount.username);
+                console.log("localAccountId:", currentAccount.localAccountId);
+                console.log("homeAccountId:", currentAccount.homeAccountId);
+                console.log("environment:", currentAccount.environment);
+                console.log("tenantId:", currentAccount.tenantId);
+                console.log("name:", currentAccount.name);
+                console.log("idToken:", currentAccount.idToken);
+                console.log("idTokenClaims:", currentAccount.idTokenClaims);
+            } else {
+                console.log("No current account found!");
+            }
+            console.log("=== END MSAL ACCOUNT DEBUG ===");
+            
             document.getElementById("signinSection").classList.add("hidden");
             document.getElementById("mainForm").classList.remove("hidden");
             await loadDropdownData();
